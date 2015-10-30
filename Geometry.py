@@ -52,6 +52,26 @@ class Coordinate:
     def getZ(self):
         return self.z
 
+    def addCoor(self,other):
+        #this returns a vector from self to other
+        distance = self.distance(other)
+        angleXY = math.acos(other.getX()/other.getY())
+        angleZY = math.acos(other.getZ()/other.getY())
+        vector = Vector(distance,angleXY,angleZY)
+        return vector
+
+    def addVector(self,other):
+        #this returns a Coordinate
+        return other + self
+
+    def __add__(self,other):
+        if isinstance(other,Coordinate):
+            return self.addCoor(other)
+        elif (isinstance(other,Vector)):
+            return self.addVector(other)
+        else:
+            return other
+
 class Vector:
     #three demensional vector
     def __init__(self,distance,angleXY,angleZY = None):
@@ -72,7 +92,7 @@ class Vector:
             self.angleZY = 0
                         
         self.i = distance * math.cos(self.angleXY)
-        self.j = distance * math.sin(self.angleXY)
+        self.j = distance * (math.sin(self.angleXY) + math.cos(self.angleZY))
         self.k = distance * math.sin(self.angleZY)
         #i = x
         #j = y
@@ -93,6 +113,12 @@ class Vector:
             return self.addCoor(other)
         else:
             return other
+
+    def get_xy(self):
+        return angleXY
+
+    def get_zy(self):
+        return angleZY
 
 class Ellipse:
     
@@ -118,6 +144,7 @@ class Ellipse:
         self.semimajor_axis = focal_one.distance(focal_two)/2
         self.semiminor_axis = math.sqrt(self.semimajor_axis**2*(1-self.eccentricity**2))
         self.area = math.pi * self.semimajor_axis * self.semiminor_axis
+
 
     def __str__(self):
         string = "Focal One = " + str(self.focal_one)
@@ -145,43 +172,82 @@ class Ellipse:
         plt.xlabel('Radians')
         plt.show()
 
+    def eccentricity_from_axis(self,semimajor_axis,semiminor_axis):
+        result = (1+(semimajor_axis/semiminor_axis)) * (1-(semimajor_axis/semiminor_axis))
+        result = math.sqrt(result)
+        return result
+
+    def viewed_from_angle(self,other):                                     
+        #this accepts a Vector to the first focal point
+        #it returns another Ellispse that is not to scale of the distance viewed
+        if not isinstance(other,Vector):
+            return None
+        #somewhat janky but it means I don't have another level of indentation
+        #for now I will try immplementing for just an angle variation on X
+        new_focal_one = self.focal_one + other
+        new_focal_two = self.focal_two + other
+
+        
+
+
+
     def plot_cross_section(self,title,points = None):
-        #this can only plot two dimensional ellipses and for right now it just plots x and y
-        #hopefully I can modify this to accept a plane instead of xyz
-        #also this plots in a scatter plot becuase this is just for visualization and I don't need to use this for real
+        #Iproject the ellipse as a 2d object by using the plane of the ellipse as a referenec frame
         if points is None:
             points = 1000
         theta = numpy.linspace(0,2*math.pi,points)
         x_values = []
         y_values = []
-        z_values = []
+        max_x = None
+        min_x = None
+        max_y = None
+        min_y = None
+
         #this creates the values that will be plotted
         for i in theta:
             r = self.radius(i)
             v = Vector(r,i)
             location = v + self.focal_one
-            x_values.append(location.getX())
-            y_values.append(location.getY())
-            z_values.append(location.getZ())
+            x = location.getX()
+            y = location.getY()
+            x_values.append(x)
+            y_values.append(y)
+            if(max_x is None or x > max_x):
+                max_x = x
+            if(min_x is None or x < min_x):
+                min_x = x
+            if(max_y is None or y > max_y):
+                max_y = y
+            if(min_y is None or y < min_y):
+                min_y = y
 
-        fig = plt.figure()
-        ax = fig.add_subplot(2,2,1,aspect = 'equal',title = "X-Y Plane")
-        ay = fig.add_subplot(2,2,3,aspect = 'equal',title = "X-Z Plane")
-        az = fig.add_subplot(2,2,4,aspect = 'equal',title = "Z-Y Plane")
+        x_difference = max_x - min_x
+        y_difference = max_y - min_y
 
-        ax.axis([-10.0,10.0,0.0,10.0])
-        ay.axis([-10.0,10.0,0.0,10.0])
-        az.axis([-10.0,10.0,0.0,10.0])
+        #at this point we know the upper and lower bounds of the graph
+        #so I'm going to add 10% to give some visibility
+
+        increase = .1
+
+        max_x += x_difference * increase
+        min_x -= x_difference * increase
+
+        max_y += y_difference * increase
+        min_y -= y_difference * increase
+
+        fig = plt.figure(figsize=(10,10))
+        ax = fig.add_subplot(111,aspect = 'equal',title = "X-Y Plane")
+
+        ax.axis([min_x,max_x,min_y,max_y])
 
         ax.scatter(x_values,y_values)
-        ay.scatter(x_values,z_values)
-        az.scatter(z_values,y_values)
+
 
         plt.show()
 
 
 a = Coordinate(3,4)
-b = Coordinate(10,2)
+b = Coordinate(10,-10)
 #z-values don't quite work yet
 
 circle_one = Ellipse(a,b)
