@@ -19,8 +19,8 @@ class Vector:
             self.angleZ = 0
         
         distanceXY = self.distance * math.cos(self.angleZ)                
-        self.i = distanceXY * math.cos(self.angleXY)
-        self.j = distanceXY * math.sin(self.angleXY)
+        self.i = distanceXY * math.sin(self.angleXY)
+        self.j = distanceXY * math.cos(self.angleXY)
         self.k = distance * math.sin(self.angleZ)
         #i = x
         #j = y
@@ -43,10 +43,10 @@ class Vector:
             return other
 
     def get_xy(self):
-        return angleXY
+        return self.angleXY
 
-    def get_zy(self):
-        return Y
+    def get_z(self):
+        return self.angleZ
 
 class Coordinate:
     # note that coordinates are static points in space that cannot change with time
@@ -90,8 +90,17 @@ class Coordinate:
     def addCoor(self,other):
         #this returns a vector from self to other
         distance = self.distance(other)
-        angleXY = math.acos(other.getX()/other.getY())
-        angleZ = math.acos(other.getZ()/other.getY())
+        x = other.getX() - self.x
+        y = other.getY() - self.y
+        #we need the relative coordinates for this
+        #we also need the xy distance
+        distanceXY = math.sqrt(x**2+y**2)
+        
+        if x == 0:
+            angleXY = 0
+        else:
+            angleXY = math.atan(y/x)
+        angleZ = math.acos(distanceXY/distance)
         vector = Vector(distance,angleXY,angleZ)
         return vector
 
@@ -104,5 +113,11 @@ class Coordinate:
             return self.addCoor(other)
         elif (isinstance(other,Vector)):
             return self.addVector(other)
+        else:
+            return other
+
+    def __sub__(self,other):
+        if isinstance(other,Coordinate):
+            return self.subCoor(other)
         else:
             return other

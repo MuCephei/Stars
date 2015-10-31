@@ -28,8 +28,8 @@ class Ellipse:
         self.semimajor_axis = focal_one.distance(focal_two)/2
         self.semiminor_axis = math.sqrt(self.semimajor_axis**2*(1-self.eccentricity**2))
         self.area = math.pi * self.semimajor_axis * self.semiminor_axis
-        self.theta = math.atan((focal_one.getX()-focal_two.getX())/(focal_one.getY()-focal_two.getY()))
 
+        self.vector = focal_one + self.focal_two
 
     def __str__(self):
         string = "Focal One = " + str(self.focal_one)
@@ -38,15 +38,19 @@ class Ellipse:
         string += "\nSemimajor axis = " + str(self.semimajor_axis)
         string += "\nSemiminor axis = " + str(self.semiminor_axis)
         string += "\nArea = " + str(self.area)
+        string += "\nAngleXY = " + str(self.vector.get_xy())
+        string += "\nAngleZ = " + str(self.vector.get_z())
         return string
 
     def radius(self,theta_input):
         #this result is from the primary axis or focal_one
         #self.theta is the rotation of the ellipse while theta_input is the theta with reference to focal_one
         #this means that theta + theta_input will give angle I want
-        theta = is_num.isAngle(self.theta + theta_input)
+
+        theta = is_num.isAngle(self.vector.get_xy() + theta_input)
         result = self.semimajor_axis * (1 - self.eccentricity**2)
         result = result / (1 + self.eccentricity * math.cos(theta))
+        result = result * math.cos(self.vector.get_z())
         return result
 
     def plot_angle(self):
