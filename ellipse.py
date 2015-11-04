@@ -94,6 +94,9 @@ class Ellipse:
         max_y = None
         min_y = None
 
+        # I also need to create and angle offset that will make sure that the ellipse is always projected with respect to it's own plane of reference
+        
+
         #this creates the values that will be plotted
         for i in theta:
             r = self.radius(i)
