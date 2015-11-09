@@ -106,25 +106,38 @@ class Vector(Coordinate):
     #Note that vector when expressed like this is just a dimension, and has no starting point
     #For convienience I express the vector as starting at 0 (a coordinate)
 
-    """
-    *
-        cross product
-            vector
-        constant
-    /
-        constant
 
-    rotation - do later
-        I plan on using this to change frames of reference
+  #  rotation - do later
+ #       I plan on using this to change frames of reference
 
-    """
+    def getDistanceXY(self):
+        #this is the length of the vector as if it had no z value
+        # or it was flatened onto the ground
+
+        flat = Coordinate(self.x,self.y)
+        return flat.distance(Coordinate())
+        # This is the distance to the origin
 
     def __init__(self,x = None,y = None,z = None):
         Coordinate.__init__(self,x,y,z)
 
+        self.distance = Coordinate.distance(self,Coordinate())
+        # This is just the distance to the origin
+
+        self.angleXY = math.tan(self.x/self.y)
+
+        self.distanceXY = self.getDistanceXY()
+
+        #cos = a/h
+        #a = distanceXY
+        #h = distance
+        self.angleZ = math.acos(self.distanceXY/self.distance)
+
     def __str__(self):
         result = Coordinate.__str__(self)
-        result += " I'm a Vector"
+        result += " Distance: " + str(self.distance)
+        result += " angleXY: " + str(self.angleXY)
+        result += " angleZ: " + str(self.angleZ)
         return result
 
     def __add__(self,other):
