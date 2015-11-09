@@ -1,8 +1,8 @@
 import vector
 import ellipse
 
-a = vector.Coordinate(3,8)
-b = vector.Coordinate(3,8,10)
+a = vector.Coordinate(3,5)
+b = vector.Coordinate(7,8)
 c = vector.Coordinate(4,8)
 #z-values don't quite work yet
 
