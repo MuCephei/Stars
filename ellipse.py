@@ -1,4 +1,4 @@
-import vector
+import coordinate
 import is_num
 import numpy
 import math
@@ -8,17 +8,17 @@ class Ellipse:
     
     def __init__(self,focal_one,focal_two,eccentricity = None):
 
-        if isinstance(focal_one,vector.Coordinate):
+        if isinstance(focal_one,coordinate.Coordinate):
             self.focal_one = focal_one
         else:
-            print("Error: Creating an Ellipse\nfocal_one is not a vector.Coordinate")
-            self.focal_one = vector.Coordinate()
+            print("Error: Creating an Ellipse\nfocal_one is not a Coordinate")
+            self.focal_one = coordinate.Coordinate()
 
-        if isinstance(focal_two,vector.Coordinate):
+        if isinstance(focal_two,coordinate.Coordinate):
             self.focal_two = focal_two
         else:
-            print("Error: Creating an Ellipse\nfocal_two is not a vector.Coordinate")
-            self.focal_two = vector.Coordinate()
+            print("Error: Creating an Ellipse\nfocal_two is not a Coordinate")
+            self.focal_two = coordinate.Coordinate()
 
         if eccentricity is not None and is_num.isNumber(eccentricity):
             self.eccentricity = eccentricity
@@ -38,19 +38,18 @@ class Ellipse:
         string += "\nSemimajor axis = " + str(self.semimajor_axis)
         string += "\nSemiminor axis = " + str(self.semiminor_axis)
         string += "\nArea = " + str(self.area)
-        string += "\nAngleXY = " + str(self.vector.get_xy())
-        string += "\nAngleZ = " + str(self.vector.get_z())
+        string += "\nAngleXY = " + str(self.coordinate.get_xy())
+        string += "\nAngleZ = " + str(self.coordinate.get_z())
         return string
 
     def radius(self,theta_input):
         #this result is from the primary axis or focal_one
-        #self.theta is the rotation of the ellipse while theta_input is the theta with reference to focal_one
-        #this means that theta + theta_input will give angle I want
+        #however to be uselful it needs to be oriented to whatever plane you are using
 
-        theta = is_num.isAngle(self.vector.get_xy() + theta_input)
+        theta = is_num.isAngle(self.coordinate.get_xy() + theta_input)
         result = self.semimajor_axis * (1 - self.eccentricity**2)
         result = result / (1 + self.eccentricity * math.cos(theta))
-        result = result * math.cos(self.vector.get_z())
+        result = result * math.cos(self.coordinate.get_z())
         return result
 
     def plot_angle(self):
@@ -69,9 +68,9 @@ class Ellipse:
         return result
 
     def viewed_from_angle(self,other):                                     
-        #this accepts a vector.Vector to the first focal point
+        #this accepts a coordinate.Vector to the first focal point
         #it returns another Ellispse that is not to scale of the distance viewed
-        if not isinstance(other,vector.Vector):
+        if not isinstance(other,coordinate.Vector):
             return None
         #somewhat janky but it means I don't have another level of indentation
         #for now I will try immplementing for just an angle variation on X
@@ -83,7 +82,7 @@ class Ellipse:
 
 
     def plot_cross_section(self,title,points = None):
-        #Iproject the ellipse as a 2d object by using the plane of the ellipse as a referenec frame
+        #I project the ellipse as a 2d object by using the plane of the ellipse as a referenec frame
         if points is None:
             points = 1000
         theta = numpy.linspace(0,2*math.pi,points)
@@ -100,7 +99,7 @@ class Ellipse:
         #this creates the values that will be plotted
         for i in theta:
             r = self.radius(i)
-            v = vector.Vector(r,i)
+            v = coordinate.Vector(r,i)
             location = v + self.focal_one
             x = location.getX()
             y = location.getY()

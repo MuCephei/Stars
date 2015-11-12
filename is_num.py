@@ -8,7 +8,8 @@ def isNumber(input):
         result = False
     return result
 
-def isAngle(input):
+def angle(input):
+    #note that many other things are angles, this just cleans it up for you
     if isNumber(input):
         temp = input/(2*math.pi)
         temp -= int(temp)
