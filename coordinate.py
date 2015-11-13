@@ -153,10 +153,19 @@ class Vector(Coordinate):
 
         self.distance = Coordinate.distance(self,Coordinate())
         # This is just the distance to the origin
-        if self.y == 0:
+        if self.x == 0 and self.y > 0:
+            self.angleXY = math.pi/2
+        elif self.x == 0 and self.y < 0:
+            self.angleXY = 3 * math.pi/2
+        elif self.x == 0 and self.y == 0:
             self.angleXY = 0
+            #this one is kindof arbirtrary
         else:
-            self.angleXY = math.tan(self.x/self.y)
+            #I need to take into account the quadrants here
+            #Q1 and Q2 are good the way they are
+            self.angleXY = math.atan(self.y/self.x)
+            if self.y < 0:
+                self.angleXY += math.pi
 
         self.distanceXY = self.getDistanceXY()
 
@@ -166,7 +175,10 @@ class Vector(Coordinate):
         if(self.distance == 0):
             self.angleZ = 0
         else:
+            #quadrants are important here as well
             self.angleZ = math.acos(self.distanceXY/self.distance)
+            if self.distanceXY < 0:
+                self.angleZ += math.pi
 
     def __str__(self):
         result = Coordinate.__str__(self)

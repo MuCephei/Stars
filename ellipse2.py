@@ -57,7 +57,7 @@ class Ellipse:
         string += "\nVector = " + str(self.vector)
         return string
 
-    def radius(self,theta):
+    def distance(self,theta):
         #this result is distance from the focal that the angle is with respect to
 
         #however for the result to be uselful it needs to be oriented to whatever plane you are using
@@ -84,10 +84,11 @@ class Ellipse:
 
         #for right now this is going to plot the four "corners" of the ellipse
         cardinalPoints = []
-        x_values = []
-        y_values = []
+        cardinal_x_values = []
+        cardinal_y_values = []
 
         distance_along_semimajoraxis = ((1 - self.eccentricity) * self.semimajoraxis)
+        #a(1-e)
 
         unitVector = self.vector.unitVector()
 
@@ -106,26 +107,9 @@ class Ellipse:
 
         x = 0
         for i in cardinalPoints:
-            print(x)
-            print(i)
-            x_values.append(i.getX())
-            y_values.append(i.getY())
+            cardinal_x_values.append(i.getX())
+            cardinal_y_values.append(i.getY())
             x += 1
-
-        fig = plt.figure(figsize = (10,10))
-        ax = fig.add_subplot(111,aspect = 'equal',title = "X-Y Plane")
-
-        #ax.axis([min_x,max_x,min_y,max_y])
-
-        ax.scatter([self.focal_one.getX(),self.focal_two.getX()],[self.focal_one.getY(),self.focal_two.getX()],color = 'red')
-
-        ax.scatter(x_values,y_values,color = 'blue')
-
-        plt.show()
-
-
-"""
-
 
         theta_values = numpy.linspace(0,2*math.pi,points)
         # equally spaced angles
@@ -140,35 +124,34 @@ class Ellipse:
         #these are fields that are going to be used in the graph
         #I set the max and min fields to None so I don't have to assume where in cartesian space I will be
 
-        #the vector of the ellipse (points from focal_one to focal_two) will contain the information required 
-        # to understand the result from radius(theta)
-
-        #remember that radius(theta) assumes we gave it the angle from it's own plane of reference
-        # where self.vector is along the x axis
-
         offset = self.vector.get_angleXY()
+        #half the time this is backwards
+        #and can be fixed by adding pi, but then that screws up the other times
 
         for i in theta_values:
-            d = self.radius(i)
-            phi = i + offset
-            #phi is the angle that you are from from focal_one
-            #it's focal_one becuase we used self.vector
-            #we can use focal_two by instead using -1*self.vector
-            x = self.focal_one.getX() + d*math.cos(phi)
-            y = self.focal_one.getY() + d*math.sin(phi)
-            #remember that d is distance from the focal we chose (one)
-            x_values.append(x)
-            y_values.append(y)
+            d = self.distance(i)
+            x = d * math.cos(i)
+            y = d * math.sin(i)
+            current_location = coordinate.Vector(x,y)
+            #at this point the current_location vector points to a spot that is independant of the angle of the ellipse
+            #so we need to rotate it appropriatly
+            current_location = current_location.rotate(offset)
+            current_location = self.focal_two + current_location
+            #this will not work in 3D space
+            #we are using focal_two becuase it is at the end of self.vector
+            x_addition = current_location.getX()
+            y_addition = current_location.getY()
+            x_values.append(x_addition)
+            y_values.append(y_addition)
 
-            if(max_x is None or x > max_x):
-                max_x = x
-            if(min_x is None or x < min_x):
-                min_x = x
-            if(max_y is None or y > max_y):
-                max_y = y
-            if(min_y is None or y < min_y):
-                min_y = y
-            #these are so we can have the graph be the right size
+            if(max_x is None or x_addition > max_x):
+                max_x = x_addition
+            if(min_x is None or x_addition < min_x):
+                min_x = x_addition
+            if(max_y is None or y_addition > max_y):
+                max_y = y_addition
+            if(min_y is None or y_addition < min_y):
+                min_y = y_addition
 
         x_difference = max_x - min_x
         y_difference = max_y - min_y
@@ -181,21 +164,20 @@ class Ellipse:
         max_y += y_difference * increase
         min_y -= y_difference * increase
 
-        #what I did above was make the upper and lowers bounds of the graph increase
-        # so we have space on the edges
-
         fig = plt.figure(figsize = (10,10))
         ax = fig.add_subplot(111,aspect = 'equal',title = "X-Y Plane")
 
-        ax.axis([min_x,max_x,min_y,max_y])
+        #ax.axis([min_x,max_x,min_y,max_y])
 
-        ax.scatter([self.focal_one.getX(),self.focal_two.getX()],[self.focal_one.getY(),self.focal_two.getX()])
+        ax.scatter([self.focal_one.getX(),self.focal_two.getX()],[self.focal_one.getY(),self.focal_two.getY()],color = 'red')
 
-        ax.scatter(x_values,y_values)
+        ax.scatter(x_values,y_values,color = 'green')
+        #this is not giving the correct points
+
+        ax.scatter(cardinal_x_values,cardinal_y_values,color = 'blue')
 
         plt.show()
 
-"""
 
 
 
