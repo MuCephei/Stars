@@ -5,120 +5,156 @@ import math
 import matplotlib.pyplot as plt
 
 class Ellipse:
-    
-    def __init__(self,focal_one,focal_two,eccentricity = None):
 
+    def __init__(self,focal_one,focal_two,distance,inclination_angle = None):
+
+        #first I need to sanitize the data
+        
         if isinstance(focal_one,coordinate.Coordinate):
             self.focal_one = focal_one
         else:
-            print("Error: Creating an Ellipse\nfocal_one is not a Coordinate")
-            self.focal_one = coordinate.Coordinate()
+            raise InncorectInput("The first argument must be a Coordinate")
 
         if isinstance(focal_two,coordinate.Coordinate):
             self.focal_two = focal_two
         else:
-            print("Error: Creating an Ellipse\nfocal_two is not a Coordinate")
-            self.focal_two = coordinate.Coordinate()
+            raise InncorectInput("The second argument must be a Coordinate")
 
-        if eccentricity is not None and is_num.isNumber(eccentricity):
-            self.eccentricity = eccentricity
+        #distance is 2r for a circle and  r + r' for all ellispes
+        #also 2* semimajoraxis
+        if is_num.isNumber(distance):
+            self.semimajoraxis = float(distance)/2
         else:
-            self.eccentricity = 0
+            raise InncorectInput("The third argument must be a number")
 
-        self.semimajor_axis = focal_one.distance(focal_two)/2
-        self.semiminor_axis = math.sqrt(self.semimajor_axis**2*(1-self.eccentricity**2))
-        self.area = math.pi * self.semimajor_axis * self.semiminor_axis
+        #the inclination angle is in radians
+        if inclination_angle is None:
+            self.inclination_angle = 0
+        elif is_num.isNumber(inclination_angle):
+            self.inclination_angle = is_num.angle(inclination_angle)
+        else:
+            raise InncorectInput("The fourth argument must be a number")
 
-        self.vector = focal_one + self.focal_two
+        self.vector = self.focal_one - self.focal_two
+        #this vector is from focal_one to focal_two
+        self.eccentricity = self.vector.distance/(self.semimajoraxis * 2)
+        if self.eccentricity > 1:
+            raise InncorectInput("These inputs do not produce a valid Ellipse")
+        self.semiminor_axis = math.sqrt(self.semimajoraxis**2 * (1-self.eccentricity**2))
+        self.area = math.pi * self.semimajoraxis * self.semiminor_axis
+
+        #this vector is from focal_one to focal_two
 
     def __str__(self):
+
         string = "Focal One = " + str(self.focal_one)
         string += "\nFocal Two = " + str(self.focal_two)
         string += "\nEccentricity = " + str(self.eccentricity)
-        string += "\nSemimajor axis = " + str(self.semimajor_axis)
-        string += "\nSemiminor axis = " + str(self.semiminor_axis)
+        string += "\nInclination Angle = " + str(self.inclination_angle)
+        string += "\nSemimajor Axis = " + str(self.semimajoraxis)
+        string += "\nSemiminor Axis = " + str(self.semiminor_axis)
         string += "\nArea = " + str(self.area)
-        string += "\nAngleXY = " + str(self.coordinate.get_xy())
-        string += "\nAngleZ = " + str(self.coordinate.get_z())
+        string += "\nVector = " + str(self.vector)
         return string
 
-    def radius(self,theta_input):
-        #this result is from the primary axis or focal_one
-        #however to be uselful it needs to be oriented to whatever plane you are using
+    def distance(self,theta):
+        #this result is distance from the focal that the angle is with respect to
 
-        theta = is_num.isAngle(self.coordinate.get_xy() + theta_input)
-        result = self.semimajor_axis * (1 - self.eccentricity**2)
-        result = result / (1 + self.eccentricity * math.cos(theta))
-        result = result * math.cos(self.coordinate.get_z())
+        #however for the result to be uselful it needs to be oriented to whatever plane you are using
+        #for example if theta is pi/2 then it will give the distance to the point directly above focal_one 
+        # in the ellipse's own plane of reference
+
+        theta = is_num.angle(theta)
+        result = theta
+        #this makes the angle <= 2pi and > 0
+        if theta is not None:
+            result = self.semimajoraxis * (1 - self.eccentricity**2)
+            result = result / (1 + (self.eccentricity * math.cos(theta)))
         return result
 
-    def plot_angle(self):
-        # this plot is the radius as a function of angle
-        radius = []
-        theta = numpy.linspace(0,2*math.pi,1000)
-        for x in theta:
-            radius.append(self.radius(x))
-        plt.plot(theta,radius)
-        plt.xlabel('Radians')
-        plt.show()
+    def plot_2D(self,points = None):
+        #this plots the ellipse in the xy plane
+        # in the future I plan on being able to plot on an arbitrary plane
+        # but for now we need this for testing
 
-    def eccentricity_from_axis(self,semimajor_axis,semiminor_axis):
-        result = (1+(semimajor_axis/semiminor_axis)) * (1-(semimajor_axis/semiminor_axis))
-        result = math.sqrt(result)
-        return result
+        #points is the number of points that we will use in the scatterplot
 
-    def viewed_from_angle(self,other):                                     
-        #this accepts a coordinate.Vector to the first focal point
-        #it returns another Ellispse that is not to scale of the distance viewed
-        if not isinstance(other,coordinate.Vector):
-            return None
-        #somewhat janky but it means I don't have another level of indentation
-        #for now I will try immplementing for just an angle variation on X
-        new_focal_one = self.focal_one + other
-        new_focal_two = self.focal_two + other
-
-        
-
-
-
-    def plot_cross_section(self,title,points = None):
-        #I project the ellipse as a 2d object by using the plane of the ellipse as a referenec frame
         if points is None:
-            points = 1000
-        theta = numpy.linspace(0,2*math.pi,points)
+            points = 1000 #default
+
+        #for right now this is going to plot the four "corners" of the ellipse
+        cardinalPoints = []
+        cardinal_x_values = []
+        cardinal_y_values = []
+
+        distance_along_semimajoraxis = ((1 - self.eccentricity) * self.semimajoraxis)
+        #a(1-e)
+
+        unitVector = self.vector.unitVector()
+
+        cardinalPoints.append(self.focal_two + (unitVector * distance_along_semimajoraxis))
+
+        cardinalPoints.append(self.focal_one - (unitVector * distance_along_semimajoraxis))
+        #this is negative becuase self.vector is going in the opposite direction
+
+        middle = self.focal_one + (self.vector/2)
+
+        perpendicular_vector = unitVector.rotate(math.pi/2)
+
+        cardinalPoints.append(middle + (perpendicular_vector * self.semiminor_axis))
+
+        cardinalPoints.append(middle - (perpendicular_vector * self.semiminor_axis))
+
+        x = 0
+        for i in cardinalPoints:
+            cardinal_x_values.append(i.getX())
+            cardinal_y_values.append(i.getY())
+            x += 1
+
+        theta_values = numpy.linspace(0,2*math.pi,points)
+        # equally spaced angles
+        #note that this will not mean equally spaced points on the graph
+
         x_values = []
         y_values = []
         max_x = None
         min_x = None
-        max_y = None
+        max_y = None    
         min_y = None
+        #these are fields that are going to be used in the graph
+        #I set the max and min fields to None so I don't have to assume where in cartesian space I will be
 
-        # I also need to create and angle offset that will make sure that the ellipse is always projected with respect to it's own plane of reference
-        
+        offset = self.vector.get_angleXY()
+        #half the time this is backwards
+        #and can be fixed by adding pi, but then that screws up the other times
 
-        #this creates the values that will be plotted
-        for i in theta:
-            r = self.radius(i)
-            v = coordinate.Vector(r,i)
-            location = v + self.focal_one
-            x = location.getX()
-            y = location.getY()
-            x_values.append(x)
-            y_values.append(y)
-            if(max_x is None or x > max_x):
-                max_x = x
-            if(min_x is None or x < min_x):
-                min_x = x
-            if(max_y is None or y > max_y):
-                max_y = y
-            if(min_y is None or y < min_y):
-                min_y = y
+        for i in theta_values:
+            d = self.distance(i)
+            x = d * math.cos(i)
+            y = d * math.sin(i)
+            current_location = coordinate.Vector(x,y)
+            #at this point the current_location vector points to a spot that is independant of the angle of the ellipse
+            #so we need to rotate it appropriatly
+            current_location = current_location.rotate(offset)
+            current_location = self.focal_two + current_location
+            #this will not work in 3D space
+            #we are using focal_two becuase it is at the end of self.vector
+            x_addition = current_location.getX()
+            y_addition = current_location.getY()
+            x_values.append(x_addition)
+            y_values.append(y_addition)
+
+            if(max_x is None or x_addition > max_x):
+                max_x = x_addition
+            if(min_x is None or x_addition < min_x):
+                min_x = x_addition
+            if(max_y is None or y_addition > max_y):
+                max_y = y_addition
+            if(min_y is None or y_addition < min_y):
+                min_y = y_addition
 
         x_difference = max_x - min_x
         y_difference = max_y - min_y
-
-        #at this point we know the upper and lower bounds of the graph
-        #so I'm going to add 10% to give some visibility
 
         increase = .1
 
@@ -128,12 +164,21 @@ class Ellipse:
         max_y += y_difference * increase
         min_y -= y_difference * increase
 
-        fig = plt.figure(figsize=(10,10))
+        fig = plt.figure(figsize = (10,10))
         ax = fig.add_subplot(111,aspect = 'equal',title = "X-Y Plane")
 
-        ax.axis([min_x,max_x,min_y,max_y])
+        #ax.axis([min_x,max_x,min_y,max_y])
 
-        ax.scatter(x_values,y_values)
+        ax.scatter([self.focal_one.getX(),self.focal_two.getX()],[self.focal_one.getY(),self.focal_two.getY()],color = 'red')
 
+        ax.scatter(x_values,y_values,color = 'green')
+        #this is not giving the correct points
+
+        ax.scatter(cardinal_x_values,cardinal_y_values,color = 'blue')
 
         plt.show()
+
+
+
+
+
