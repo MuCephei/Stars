@@ -4,27 +4,41 @@ import math
 
 a = coordinate.Coordinate()
 b = coordinate.Coordinate(1,1)
+z = coordinate.Coordinate(1,1,2)
 c = coordinate.Coordinate(3,3)
-d = coordinate.Coordinate(5,10,15)
+d = coordinate.Coordinate(5,1,15)
 e = coordinate.Coordinate(0,0,7)
 f = coordinate.Coordinate(3,5)
-g = coordinate.Coordinate(5,3)
-h = coordinate.Coordinate(10,10)
+g = coordinate.Coordinate(0,5,3)
+h = coordinate.Coordinate(0,5,0)
 
-ellipseA = ellipse.Ellipse(b,b,5)
-ellipseA.plot_2D()
+# ellipseZ = ellipse.Ellipse(a,e,c,10)
+# ellipseZ.plot3()
 
-ellipseB = ellipse.Ellipse(b,h,15)
-ellipseB.plot_2D()
+# ellipseA = ellipse.Ellipse(b,z,d,5)
+# ellipseA.plot3()
 
-ellipseC = ellipse.Ellipse(c,f,15)
-ellipseC.plot_2D()
+ellipseB = ellipse.Ellipse(a,h,g,10)
+ellipseB.plot3()
 
-ellipseD = ellipse.Ellipse(c,g,5)
-ellipseD.plot_2D()
+ellipseB = ellipse.Ellipse(a,b,f,5)
+ellipseB.plot3()
 
-ellipseE = ellipse.Ellipse(c,b,5)
-ellipseE.plot_2D()
+ellipseB = ellipse.Ellipse(d,h,z,25)
+ellipseB.plot3()
 
-ellipseE = ellipse.Ellipse(b,c,5)
-ellipseE.plot_2D()
+# ellipseC = ellipse.Ellipse(c,f,b,15)
+# ellipseC.plot3()
+# ellipseC.plot_2D()
+
+# ellipseD = ellipse.Ellipse(c,g,b,5)
+# ellipseD.plot3()
+# ellipseD.plot_2D()
+
+# ellipseE = ellipse.Ellipse(c,b,g,5)
+# ellipseE.plot3()
+# ellipseE.plot_2D()
+
+# ellipseE = ellipse.Ellipse(b,c,g,5)
+# ellipseE.plot3()
+# ellipseE.plot_2D()

@@ -95,7 +95,7 @@ class Coordinate:
         else:
             raise IncorrectDivision("You must divide a Coordinate by a Constant")
 
-
+#*******************************************************************************************************
 
 class Vector(Coordinate):
     #Note that vector when expressed like this is just a dimension, and has no starting point
@@ -116,27 +116,20 @@ class Vector(Coordinate):
     def get_angleZ(self):
         return self.angleZ
 
-    def distance(self):
+    def get_distance(self):
         return self.distance
 
-    def rotate(self,angle,plane = None):
-        #for right now the plane part does nothing, but later on it should be used
+    def rotate(self,angle):
+        #fif you want to rotate something on a plane then use Plane's rotate method
         #this rotates the current vector around 0,0,0 (which I do not remember if that goes without saying)
         if not is_num.isNumber(angle):
             raise IncorrectInput("The first agrument must be a number")
 
-        if plane is None:
-            #easy case we assume the plane is x,y,z=0
-            angle = is_num.angle(angle)
-            x = (self.x * math.cos(angle)) - (self.y * math.sin(angle))
-            y = (self.x * math.sin(angle)) + (self.y * math.cos(angle))
+        angle = is_num.angle(angle)
+        x = (self.x * math.cos(angle)) - (self.y * math.sin(angle))
+        y = (self.x * math.sin(angle)) + (self.y * math.cos(angle))
 
-            return Vector(x,y,self.z)
-
-        elif isinstance(plane,Plane):
-            print("This does not do anything right now.\nPlease come back later")
-        else:
-            raise IncorrectInput("The second agrument must be nothing, or a Plane")
+        return Vector(x,y,self.z)
 
     def unitVector(self):
         #this returns a vector of length 1
@@ -236,3 +229,81 @@ class Vector(Coordinate):
                 raise DivideByZero("You cannot Divide by Zero")
         else:
             raise IncorrectDivision("You must divide a Vector by a Constant")
+
+#*******************************************************************************************************
+
+class Plane:
+    #this may need to be adjusted
+
+    def __init__(self,a,b,c):
+        #the equation fo a plane is 
+        #ax + by + cz = d
+        #where one of a,b or c is not 0
+
+        #make sure that the imputs are Coordinates
+        if not isinstance(a,Coordinate):
+            a = Coordinate()
+        if not isinstance(b,Coordinate):
+            b = Coordinate()
+        if not isinstance(c,Coordinate):
+            c = Coordinate()
+        if (a == b or b == c):
+            #we have a probleme here becuase someone thinks it's funny to 
+            #pass non coordinates to a plane
+            #or three identical points
+            raise IncorrectInput("Houston we have a problem with two or more identical points being passed to a plane")
+
+        self.vector_one = a - b
+        #vector_one is from a to band two is from b to c
+        self.vector_two = b - c
+        if (self.vector_one == self.vector_two):
+            raise ImproperInput("Houston we have a problem with two identical vectors")
+
+        self.vector_normal = self.vector_one * self.vector_two
+        self.vector_normal = self.vector_normal.unitVector()
+
+        self.a = self.vector_normal.getX()#note that self.(a, b and c) have unimportant magnitudes
+        self.b = self.vector_normal.getY()
+        self.c = self.vector_normal.getZ()
+        self.d = self.a * a.getX() + self.b * a.getY() + self.c * a.getZ()
+        #self.a is from the formula while a.getX() is the value of one of the input coordinates
+
+    def on_plane(self,other):
+        #this tells you if a coordinate is on the plane
+        #seems to work so far
+        if not isinstance(other,Coordinate):
+            raise IncorrectInput("The first input must be a coordinate")
+
+        d = self.a * other.getX() + self.b * other.getY() + self.c * other.getZ()
+
+        return d == self.d
+
+    def rotate(self,other,angle):
+        #this rotates an vector around the vector normal to the plane
+        #returns a other
+        if not isinstance(other,Vector):
+            raise IncorrectInput("The first input must be a Vector")
+
+        if not is_num.isNumber(angle):
+            raise IncorrectInput("The second agrument must be a number")
+
+        angle = is_num.angle(angle)
+
+        cross = (other * self.vector_normal).unitVector()
+        #this gives us a vector pointing in the right direction with a length of one
+        result = cross * math.sin(angle)
+        result += (other.unitVector() * math.cos(angle))
+        result = result.unitVector()
+        result = result * other.get_distance()
+        return result
+
+    def __str__(self):
+        string = "Vector One = " + str(self.vector_one)
+        string += "\nVector Two = " + str(self.vector_two)
+        string += "\nVector Normal = " + str(self.vector_normal)
+        string += "\nA = " + str(self.a)
+        string += "\nB = " + str(self.b)
+        string += "\nC = " + str(self.c)
+        string += "\nD = " + str(self.d)
+
+        return string
