@@ -86,19 +86,14 @@ class Ellipse:
 
         coordinates = []    
 
-        angle_offset = self.vector.get_angleXY() 
-
         for i in theta_values:
             d = self.distance(i)
             current_location = self.vector.unitVector() * d
-            current_location = self.plane.rotate(current_location,i+angle_offset)
-            #at this point the current_location vector points to a spot that is independant of the angle of the ellipse
-            #so we need to rotate it appropriatly
-            # current_location = self.plane.rotate(current_location,angle_offset)
+
+            current_location = self.plane.rotate(current_location,i)
+
             current_location = self.focal_two + current_location
             coordinates.append(current_location)
-            # print(i+angle_offset)
-            # print(current_location)
 
         return coordinates
 
@@ -209,7 +204,7 @@ class Ellipse:
         #a(1-e)
         unitVector = self.vector.unitVector()
         middle = self.focal_one + (self.vector/2)
-        perpendicular_vector = unitVector.rotate(math.pi/2)
+        perpendicular_vector = self.plane.rotate(unitVector,math.pi/2)
 
         cardinalPoints.append(self.focal_two + (unitVector * distance_along_semimajoraxis))
         cardinalPoints.append(self.focal_one - (unitVector * distance_along_semimajoraxis))
@@ -233,18 +228,18 @@ class Ellipse:
         #I thought about making a function to do this, but it seemed unnessary
 
         xy = fig.add_subplot(311,aspect = 'equal',title = "X-Y Plane")
-        xy.scatter(x_values,y_values,color = 'orange')
+        xy.scatter(x_values,y_values,color = 'green')
         xy.axis([min_x,max_x,min_y,max_y])
         #Below is the central focal points and the cardinal points
         xy.scatter([self.focal_one.getX(),self.focal_two.getX()],[self.focal_one.getY(),self.focal_two.getY()],color = 'red')
         xy.scatter(cardinal_x_values,cardinal_y_values,color = 'blue')
 
-        yz = fig.add_subplot(312,aspect = 'equal',title = "Y-Z Plane")
-        yz.scatter(y_values,z_values,color = 'blue')
-        yz.axis([min_y,max_y,min_z,max_z])
+        zy = fig.add_subplot(312,aspect = 'equal',title = "Y-Z Plane")
+        zy.scatter(z_values,y_values,color = 'green')
+        zy.axis([min_z,max_z,min_y,max_y])
         #Below is the central focal points and the cardinal points
-        yz.scatter([self.focal_one.getY(),self.focal_two.getY()],[self.focal_one.getZ(),self.focal_two.getZ()],color = 'red')
-        yz.scatter(cardinal_y_values,cardinal_z_values,color = 'blue')
+        zy.scatter([self.focal_one.getZ(),self.focal_two.getZ()],[self.focal_one.getY(),self.focal_two.getY()],color = 'red')
+        zy.scatter(cardinal_z_values,cardinal_y_values,color = 'blue')
 
         xz = fig.add_subplot(313,aspect = 'equal',title = "X-Z Plane")
         xz.scatter(x_values,z_values,color = 'green')

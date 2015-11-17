@@ -19,6 +19,7 @@ h = coordinate.Coordinate(0,5,0)
 # ellipseA.plot3()
 
 ellipseB = ellipse.Ellipse(a,h,g,10)
+print(ellipseB.plane)
 ellipseB.plot3()
 
 ellipseB = ellipse.Ellipse(a,b,f,5)
