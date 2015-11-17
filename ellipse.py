@@ -150,6 +150,10 @@ class Ellipse:
         x_values = []
         y_values = []
         z_values = []
+        cardinalPoints = []
+        cardinal_x_values = []
+        cardinal_y_values = []
+        cardinal_z_values = []
 
         max_x = None
         max_y = None
@@ -196,19 +200,58 @@ class Ellipse:
         max_z += 1 + z_difference * increase
         min_z -= 1 + z_difference * increase
 
+        #we have our normal ellipse values plotted
+        #now to make sure that this works we will also plot the cardinal points of the ellipse
+        #(The cardinal points are the two farest away points and the two closest points)
+        #or the points at either end of the semi major/minor axises 
+
+        distance_along_semimajoraxis = ((1 - self.eccentricity) * self.semimajoraxis)
+        #a(1-e)
+        unitVector = self.vector.unitVector()
+        middle = self.focal_one + (self.vector/2)
+        perpendicular_vector = unitVector.rotate(math.pi/2)
+
+        cardinalPoints.append(self.focal_two + (unitVector * distance_along_semimajoraxis))
+        cardinalPoints.append(self.focal_one - (unitVector * distance_along_semimajoraxis))
+        #this is negative becuase self.vector is going in the opposite direction
+        #these are the semimajor end points
+
+        cardinalPoints.append(middle + (perpendicular_vector * self.semiminor_axis))
+        cardinalPoints.append(middle - (perpendicular_vector * self.semiminor_axis))
+        #this is negative becuase perpendicular_vector is going in the opposite direction
+        #these are the semiminor end points
+
+        for i in cardinalPoints:
+            cardinal_x_values.append(i.getX())
+            cardinal_y_values.append(i.getY())
+            cardinal_z_values.append(i.getZ())
+
+        #These cardinal points help me make sure that the correct ellipse is being plotted
+
         fig = plt.figure(figsize = (8,13))
+        #the above number are arbirary numbers, I just picked some I liked to be the size of the big image it makes
+        #I thought about making a function to do this, but it seemed unnessary
 
-        ax1 = fig.add_subplot(311,aspect = 'equal',title = "X-Y Plane")
-        ax1.scatter(x_values,y_values,color = 'orange')
-        ax1.axis([min_x,max_x,min_y,max_y])
+        xy = fig.add_subplot(311,aspect = 'equal',title = "X-Y Plane")
+        xy.scatter(x_values,y_values,color = 'orange')
+        xy.axis([min_x,max_x,min_y,max_y])
+        #Below is the central focal points and the cardinal points
+        xy.scatter([self.focal_one.getX(),self.focal_two.getX()],[self.focal_one.getY(),self.focal_two.getY()],color = 'red')
+        xy.scatter(cardinal_x_values,cardinal_y_values,color = 'blue')
 
-        ax2 = fig.add_subplot(312,aspect = 'equal',title = "Y-Z Plane")
-        ax2.scatter(y_values,z_values,color = 'blue')
-        ax2.axis([min_y,max_y,min_z,max_z])
+        yz = fig.add_subplot(312,aspect = 'equal',title = "Y-Z Plane")
+        yz.scatter(y_values,z_values,color = 'blue')
+        yz.axis([min_y,max_y,min_z,max_z])
+        #Below is the central focal points and the cardinal points
+        yz.scatter([self.focal_one.getY(),self.focal_two.getY()],[self.focal_one.getZ(),self.focal_two.getZ()],color = 'red')
+        yz.scatter(cardinal_y_values,cardinal_z_values,color = 'blue')
 
-        ax3 = fig.add_subplot(313,aspect = 'equal',title = "X-Z Plane")
-        ax3.scatter(x_values,z_values,color = 'green')
-        ax3.axis([min_x,max_x,min_z,max_z])
+        xz = fig.add_subplot(313,aspect = 'equal',title = "X-Z Plane")
+        xz.scatter(x_values,z_values,color = 'green')
+        xz.axis([min_x,max_x,min_z,max_z])
+        #Below is the central focal points and the cardinal points
+        xz.scatter([self.focal_one.getX(),self.focal_two.getX()],[self.focal_one.getZ(),self.focal_two.getZ()],color = 'red')
+        xz.scatter(cardinal_x_values,cardinal_z_values,color = 'blue')
 
         plt.show()
 

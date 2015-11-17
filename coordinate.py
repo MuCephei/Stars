@@ -61,8 +61,7 @@ class Coordinate:
         elif isinstance(other,Coordinate):
             #This is somewhat strange in that CoordinateA - CoordinateB = Vector(from A to B)
             #self is a
-            #other is b - a
-            # a coordinate is b
+            #other is b
             x = other.getX() - self.x
             y = other.getY() - self.y
             z = other.getZ() - self.z
