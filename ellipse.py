@@ -6,39 +6,40 @@ import matplotlib.pyplot as plt
 
 class Ellipse:
 
-    def __init__(self,focal_one,focal_two,thirdPoint,distance):
+    def __init__(self,focal_one,focal_two,vector_normal,distance):
 
         #first I need to sanitize the data
         
         if isinstance(focal_one,coordinate.Coordinate):
             self.focal_one = focal_one
         else:
-            raise InncorectInput("The first argument must be a Coordinate")
+            raise IncorrectInput("The first argument must be a Coordinate")
 
         if isinstance(focal_two,coordinate.Coordinate):
             self.focal_two = focal_two
         else:
-            raise InncorectInput("The second argument must be a Coordinate")
+            raise IncorrectInput("The second argument must be a Coordinate")
 
         #distance is 2r for a circle and  r + r' for all ellispes
         #also 2* semimajoraxis
         if is_num.isNumber(distance):
             self.semimajoraxis = float(distance)/2
         else:
-            raise InncorectInput("The third argument must be a number")
+            raise IncorrectInput("The third argument must be a number")
 
         #the inclination angle is in radians
-        if isinstance(thirdPoint,coordinate.Coordinate):
+        if isinstance(vector_normal,coordinate.Vector):
             #this causes problems for circles
-            self.plane = coordinate.Plane(self.focal_one,self.focal_two,thirdPoint)
+            self.vector_normal = vector_normal
         else:
-            raise InncorectInput("The fourth argument must be a Coordinate")
+            raise IncorrectInput("The fourth argument must be a Coordinate")
 
+        self.plane = coordinate.Plane(self.vector_normal,self.focal_one)
         self.vector = self.focal_one - self.focal_two
         #this vector is from focal_one to focal_two
         self.eccentricity = self.vector.distance/(self.semimajoraxis * 2)
         if self.eccentricity > 1:
-            raise InncorectInput("These inputs do not produce a valid Ellipse")
+            raise IncorrectInput("These inputs do not produce a valid Ellipse")
         self.semiminor_axis = math.sqrt(self.semimajoraxis**2 * (1-self.eccentricity**2))
         self.area = math.pi * self.semimajoraxis * self.semiminor_axis
 
@@ -71,13 +72,21 @@ class Ellipse:
             result = result / (1 + (self.eccentricity * math.cos(theta)))
         return result
 
+    def get_location(self,theta):
+        #this is the coordinate that is given when the angle from focal_one is angle
+        distance = self.distance(theta)
+        #this could be None at this point if theta is not a number
+        #if distance is not None then theta is not None as well
+        if distance is not None:
+            current_location = self.vector.unitVector() * distance
+            current_location = self.plane.rotate(current_location,theta)
+            current_location = self.focal_two + current_location
+        return current_location
+
     def get_coordinates(self,points = None):
         #this returns the coordinates of the ellipse
         #this is with respect to angle, not time becuase an ellipse isn't an orbit
         #hopefully this helps me implement both displaying the ellipses and projecting them
-
-        #Doesn't work well
-        #**********************************************************************************************
 
         if points is None:
             points = 1000 #default
@@ -87,56 +96,10 @@ class Ellipse:
         coordinates = []    
 
         for i in theta_values:
-            d = self.distance(i)
-            current_location = self.vector.unitVector() * d
 
-            current_location = self.plane.rotate(current_location,i)
-
-            current_location = self.focal_two + current_location
-            coordinates.append(current_location)
+            coordinates.append(self.get_location(i))
 
         return coordinates
-
-    def plot_YZ(self,points = None):
-        #This is unlickely to be used in the end but I want to make sure get_coordinates works
-
-        coordinates = self.get_coordinates(points)
-
-        y_values = []
-        z_values = []
-
-        for a in coordinates:
-            y_values.append(a.getY())
-            z_values.append(a.getZ())
-
-        fig = plt.figure(figsize = (10,10))
-        ax = fig.add_subplot(111,aspect = 'equal',title = "Y-Z Plane")
-
-        ax.scatter(y_values,z_values,color = 'purple')
-        #the colours are different so I know at a glance which way it's projecting it
-
-        plt.show()
-
-    def plot_XY(self,points = None):
-        #this is to help with the testing of get_coordinates
-        #this seems to work great
-        #which mwans that the problem has to do with get_coordinate - I think it give funny Z values
-
-        coordinates = self.get_coordinates(points)
-
-        x_values = []
-        y_values = []
-
-        for a in coordinates:
-            x_values.append(a.getX())
-            y_values.append(a.getY())
-
-        fig = plt.figure(figsize = (10,10))
-        ax = fig.add_subplot(111,aspect = 'equal',title = "X-Y Plane")
-
-        ax.scatter(x_values,y_values,color = 'orange')
-
-        plt.show()
 
     def plot3(self,points = None):
 
@@ -250,149 +213,37 @@ class Ellipse:
 
         plt.show()
 
-    def plot_2D(self,points = None):
-        #im leaving this here while I make a more powerfull version that is also smaller/ easier to read
-        #this plots the ellipse in the xy plane
-        # in the future I plan on being able to plot on an arbitrary plane
-        # but for now we need this for testing
-
-        #points is the number of points that we will use in the scatterplot
-
-        if points is None:
-            points = 1000 #default
-
-        #for right now this is going to plot the four "corners" of the ellipse
-        cardinalPoints = []
-        cardinal_x_values = []
-        cardinal_y_values = []
-
-        distance_along_semimajoraxis = ((1 - self.eccentricity) * self.semimajoraxis)
-        #a(1-e)
-
-        unitVector = self.vector.unitVector()
-
-        cardinalPoints.append(self.focal_two + (unitVector * distance_along_semimajoraxis))
-
-        cardinalPoints.append(self.focal_one - (unitVector * distance_along_semimajoraxis))
-        #this is negative becuase self.vector is going in the opposite direction
-
-        middle = self.focal_one + (self.vector/2)
-
-        perpendicular_vector = unitVector.rotate(math.pi/2)
-
-        cardinalPoints.append(middle + (perpendicular_vector * self.semiminor_axis))
-
-        cardinalPoints.append(middle - (perpendicular_vector * self.semiminor_axis))
-
-        x = 0
-        for i in cardinalPoints:
-            cardinal_x_values.append(i.getX())
-            cardinal_y_values.append(i.getY())
-            x += 1
-
-        theta_values = numpy.linspace(0,2*math.pi,points)
-        # equally spaced angles
-        #note that this will not mean equally spaced points on the graph
-
-        x_values = []
-        y_values = []
-        max_x = None
-        min_x = None
-        max_y = None    
-        min_y = None
-        #these are fields that are going to be used in the graph
-        #I set the max and min fields to None so I don't have to assume where in cartesian space I will be
-
-        offset = self.vector.get_angleXY()
-        #half the time this is backwards
-        #and can be fixed by adding pi, but then that screws up the other times
-
-        for i in theta_values:
-            d = self.distance(i)
-            x = d * math.cos(i)
-            y = d * math.sin(i)
-            current_location = coordinate.Vector(x,y)
-            #at this point the current_location vector points to a spot that is independant of the angle of the ellipse
-            #so we need to rotate it appropriatly
-            current_location = current_location.rotate(offset)
-            current_location = self.focal_two + current_location
-            #this will not work in 3D space
-            #we are using focal_two becuase it is at the end of self.vector
-            x_addition = current_location.getX()
-            y_addition = current_location.getY()
-            x_values.append(x_addition)
-            y_values.append(y_addition)
-
-            if(max_x is None or x_addition > max_x):
-                max_x = x_addition
-            if(min_x is None or x_addition < min_x):
-                min_x = x_addition
-            if(max_y is None or y_addition > max_y):
-                max_y = y_addition
-            if(min_y is None or y_addition < min_y):
-                min_y = y_addition
-
-        x_difference = max_x - min_x
-        y_difference = max_y - min_y
-
-        increase = .1
-
-        max_x += x_difference * increase
-        min_x -= x_difference * increase
-
-        max_y += y_difference * increase
-        min_y -= y_difference * increase
-
-        fig = plt.figure(figsize = (10,10))
-        ax = fig.add_subplot(111,aspect = 'equal',title = "X-Y Plane")
-
-        #ax.axis([min_x,max_x,min_y,max_y])
-
-        ax.scatter([self.focal_one.getX(),self.focal_two.getX()],[self.focal_one.getY(),self.focal_two.getY()],color = 'red')
-
-        ax.scatter(x_values,y_values,color = 'green')
-
-        ax.scatter(cardinal_x_values,cardinal_y_values,color = 'blue')
-
-        plt.show()
-
-
-
 class Circle(Ellipse):
 
     #this is a specific case of an ellipse
 
-    def __init__(self,focal,point_one,point_two,radius):
+    def __init__(self,focal,vector_normal,radius):
         #first I need to sanitize the data
         
         if isinstance(focal,coordinate.Coordinate):
             self.focal_one = focal
             self.focal_two = focal
         else:
-            raise InncorectInput("The first argument must be a Coordinate")
+            raise IncorrectInput("The first argument must be a Coordinate")
 
-        if not isinstance(point_one,coordinate.Coordinate):
-            raise InncorectInput("The second argument must be a Coordinate")
+        if isinstance(vector_normal,coordinate.Vector):
+            self.vector_normal = vector_normal
+        else:
+            raise IncorrectInput("The second argument must be a Vector")
 
         #distance is 2r for a circle and  r + r' for all ellispes
         #also 2* semimajoraxis
         if is_num.isNumber(radius):
             self.semimajoraxis = float(radius)
         else:
-            raise InncorectInput("The fourth argument must be a number")
+            raise IncorrectInput("The fourth argument must be a number")
 
-        #the inclination angle is in radians
-        if isinstance(point_two,coordinate.Coordinate):
-            #this causes problems for circles
-            self.plane = coordinate.Plane(self.focal_one,point_one,point_two)
-        else:
-            raise InncorectInput("The third argument must be a Coordinate")
-
+        self.plane = coordinate.Plane(self.vector_normal,focal)
         self.vector = self.focal_one - self.focal_two
         #this vector is from focal_one to focal_two
         self.eccentricity = self.vector.distance/(self.semimajoraxis * 2)
         if self.eccentricity > 1:
-            raise InncorectInput("These inputs do not produce a valid Ellipse")
+            raise IncorrectInput("These inputs do not produce a valid Ellipse")
         self.semiminor_axis = math.sqrt(self.semimajoraxis**2 * (1-self.eccentricity**2))
         self.area = math.pi * self.semimajoraxis * self.semiminor_axis
 

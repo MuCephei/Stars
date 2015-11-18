@@ -179,6 +179,21 @@ class Vector(Coordinate):
         result += " angleZ: " + str(self.angleZ)
         return result
 
+    def __eq__(self,other):
+        if isinstance(other,Vector):
+            result = True
+            if(other.get_distance() != self.distance):
+                result = False
+            elif(other.getX() != self.x):
+                result = False
+            elif(other.getY() != self.y):
+                result = False
+            elif(other.getZ() != self.z):
+                result = False
+            return result
+        else:
+            raise IncorrectEquality("You must compare two Vectors")
+
     def __add__(self,other):
         #This accepts Vector + Vector = Vector
         if isinstance(other,Vector):
@@ -234,48 +249,33 @@ class Vector(Coordinate):
 class Plane:
     #this may need to be adjusted
 
-    def __init__(self,a,b,c):
+    def __init__(self,vector_normal,point):
         #the equation fo a plane is 
         #ax + by + cz = d
         #where one of a,b or c is not 0
 
-        #make sure that the imputs are Coordinates
-        if not isinstance(a,Coordinate):
-            a = Coordinate()
-        if not isinstance(b,Coordinate):
-            b = Coordinate()
-        if not isinstance(c,Coordinate):
-            c = Coordinate()
-        if (a == b or b == c):
-            #we have a probleme here becuase someone thinks it's funny to 
-            #pass non coordinates to a plane
-            #or three identical points
-            raise IncorrectInput("Houston we have a problem with two or more identical points being passed to a plane")
+        #make sure that the first input is a coordinate
+        if isinstance(vector_normal,Vector):
+            self.vector_normal = vector_normal.unitVector()
+        else:
+            raise IncorrectInput("The first input must be a Vector")
 
-        self.vector_one = a - b
-        #vector_one is from a to band two is from b to c
-        self.vector_two = b - c
-        if (self.vector_one == self.vector_two):
-            raise ImproperInput("Houston we have a problem with two identical vectors")
-
-        self.vector_normal = self.vector_one * self.vector_two
-        self.vector_normal = self.vector_normal.unitVector()
+        if not isinstance(point,Coordinate):
+            raise IncorrectInput("The second input must be a Coordinate")
 
         self.a = self.vector_normal.getX()#note that self.(a, b and c) have unimportant magnitudes
         self.b = self.vector_normal.getY()
         self.c = self.vector_normal.getZ()
-        self.d = self.a * a.getX() + self.b * a.getY() + self.c * a.getZ()
-        #self.a is from the formula while a.getX() is the value of one of the input coordinates
+        self.d = self.a * point.getX() + self.b * point.getY() + self.c * point.getZ()
+        #self.a is from the formula while point.getX() is the value of the input coordinate
 
     def on_plane(self,other):
         #this tells you if a coordinate is on the plane
         #seems to work so far
-        if not isinstance(other,Coordinate):
+        if isinstance(other,Coordinate) or isinstance(other,Vector):
+            return self.d == self.a * other.getX() + self.b * other.getY() + self.c * other.getZ()
+        else:
             raise IncorrectInput("The first input must be a coordinate")
-
-        d = self.a * other.getX() + self.b * other.getY() + self.c * other.getZ()
-
-        return d == self.d
 
     def rotate(self,other,angle):
         #this rotates an vector around the vector normal to the plane
@@ -297,9 +297,7 @@ class Plane:
         return result
 
     def __str__(self):
-        string = "Vector One = " + str(self.vector_one)
-        string += "\nVector Two = " + str(self.vector_two)
-        string += "\nVector Normal = " + str(self.vector_normal)
+        string = "Vector Normal = " + str(self.vector_normal)
         string += "\nA = " + str(self.a)
         string += "\nB = " + str(self.b)
         string += "\nC = " + str(self.c)
