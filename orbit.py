@@ -115,9 +115,9 @@ class Orbit:
 		#en is the eccentric anomaly
 		return self.true_anomaly(en)
 
-	def plot_time(self):
+	def plot_time(self,points):
 
-		time = np.linspace(0,self.period,100)
+		time = np.linspace(0,self.period,points)
 		angle = []
 		for t in time:
 			angle.append(self.find_angle(t))
@@ -135,7 +135,7 @@ class Orbit:
 		self.ellipse_two.plot_specific_angles(yz,"y","z","orange",angle,self.body_two.radius_in_AU())
 		self.ellipse_two.plot_specific_angles(xz,"x","z","orange",angle,self.body_two.radius_in_AU())
 
-		plt.draw(fig)
+		plt.show()
 
 	def eccentric_anomaly(self,ea,mean_anomaly):
 		return mean_anomaly + self.eccentricity*math.cos(ea)-ea

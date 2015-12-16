@@ -196,8 +196,6 @@ class Ellipse:
         elif not is_num.isNumber(size) or size <= 0:
             raise IncorrectInput("The fifth input must be a positive number")
 
-        #I'm not gona check that colour is valid
-
         theta_values = numpy.linspace(0,math.pi*2,points)
 
         coordinates = self.get_coordinates(theta_values)

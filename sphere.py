@@ -2,6 +2,8 @@ import is_num
 import math
 import constants
 import coordinate
+import matplotlib.pyplot as plt
+import random
 
 class Sphere:
 	#Celestial spheres are fun
@@ -42,29 +44,49 @@ class Star(Sphere):
 	def __init__(self,radius,mass):
 		self.luminosity = constants.solar_luminosity * (mass)**3.5
 		Sphere.__init__(self,radius*constants.solar_radius,mass*constants.solar_mass)
-
 		#I'm making a light array the consists of points, which each have a vector from the middle of the star
-		base_vector = coordinate.Vector(1,0,0)
+		base_vector = coordinate.Vector(0,0,1)
 
-		light_array = []
-		for i in range(int(radius)):
-			#I am creating a plane at each instance to rotate the necessary vector around
-			#the plane is normal to the arbitrary base_vector
-			# has a point at length,0,0
-			#where length is some away into the star
-			length = math.sqrt(radius**2 - i ** 2)
-			center = coordinate.Coordinate(length)
-			plane = coordinate.Plane(base_vector,center)
-			angle = math.asin(i/radius)
-			luminosity_coefficient = 2/5 + (3 * math.cos(angle)/5)
-			curr_luminosity = luminosity_coefficient * self.flux(radius)
-			x = (int(radius)+1)**2
-			for n in range(x):
-				temp_vector = coordinate.Vector(n)
-				theta = math.pi*2*n/x
-				#note that theta is for rotating around the plane, not the angle from the interior of the star
-				#the angle from the interior of the star is angle
-				light_array.append(Point(plane.rotate(temp_vector,theta),curr_luminosity))
+		total_limb_luminosity = 0
+
+		#it is not possible to have a point for every meter
+		#so we are going to have 1 000 000 randomly scattered points
+
+		number_of_points = 10000
+		#don't make this number much bigger than 50
+
+		self.light_array = []
+
+		for n in range(number_of_points):
+			distance = random.uniform(0,self.radius)
+			theta = random.uniform(0,math.pi*2)
+			#now the randomness needs to be adjusted to not give a concentration in the center
+			x = math.sqrt(distance) * math.cos(theta)
+			y = math.sqrt(distance) * math.sin(theta)
+			vector = coordinate.Vector(x,y)
+			angle_from_center = math.asin(vector.distance/self.radius)
+			curr_luminosity = 2/5 + (3 * math.cos(angle_from_center)/5)
+			total_limb_luminosity = total_limb_luminosity + curr_luminosity
+			self.light_array.append(Point(vector,curr_luminosity))
+
+		self.luminosity_coefficient = self.luminosity/total_limb_luminosity
+
+	def plot(self):
+		#the star's center is it's reference point here
+		x_values = []
+		y_values = []
+		intensity_values = []
+
+		for i in self.light_array:
+			x_values.append(i.vector.getX())
+			y_values.append(i.vector.getY())
+			intensity_values.append(1/i.intensity)
+
+		plt.scatter(x_values,y_values,c=intensity_values,s = 10)
+		plt.gray()
+		plt.axis('equal')
+		plt.show()
+
 
 	def radius_in_AU(self):
 		return self.radius/constants.AU
