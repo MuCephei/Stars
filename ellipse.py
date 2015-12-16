@@ -95,8 +95,6 @@ class Ellipse:
 
         if points is None:
             points = 1000 #default
-            
-        theta_values = numpy.linspace(0,math.pi*2,points)
 
         coordinates = []    
 
@@ -140,7 +138,7 @@ class Ellipse:
             raise IncorrectInput("The second and third inputs must be vaild axis names")
 
         cardinalPoints = self.get_cardinalPoints()
-
+        colours = ('purple','yellow','black','white')
         cardinal_one_values = []
         cardinal_two_values = []
 
@@ -150,7 +148,7 @@ class Ellipse:
 
         figure.scatter([self.focal_one.getDirection(axis_one),self.focal_two.getDirection(axis_one)],
             [self.focal_one.getDirection(axis_two),self.focal_two.getDirection(axis_two)],color = 'red')
-        figure.scatter(cardinal_one_values,cardinal_two_values,color = 'blue')
+        figure.scatter(cardinal_one_values,cardinal_two_values,color = colours)
 
     def plot_specific_angles(self,figure,axis_one,axis_two,colour,theta_values,size = None):
 

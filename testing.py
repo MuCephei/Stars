@@ -17,8 +17,6 @@ def orthagonal(point_one,point_two):
 	vector_two = point_one - origin
 	return vector_one * vector_two
 
-vectorZero = coordinate.Vector()
-
 a = coordinate.Coordinate(3,4,5)
 b = coordinate.Coordinate(17,-4,9)
 c = coordinate.Coordinate(-1,-1,-1)
@@ -28,12 +26,12 @@ d = coordinate.Coordinate(4,9,16)
 
 sphere_one = sphere.Star(1.227,1.1)
 sphere_two = sphere.Star(0.865,0.907)
-sphere_one.plot()
-sphere_two.plot()
+# sphere_one.plot()
+# sphere_two.plot()
 
 orbit_one = orbit.Orbit(sphere_one,sphere_two,b,orthagonal(b,a),b-c,-3594,0.5179)
 
-# orbit_one.plot_time(50)
+orbit_one.plot_time(200)
 
 #I'm looking to get a semi-major axis of 35.6 AU
 

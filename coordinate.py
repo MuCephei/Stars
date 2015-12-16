@@ -113,7 +113,6 @@ class Vector(Coordinate):
     #Note that vector when expressed like this is just a dimension, and has no starting point
     #For convienience I express the vector as starting at 0 (a coordinate)
 
-
     def getDistanceXY(self):
         #this is the length of the vector as if it had no z value
         # or it was flatened onto the ground
@@ -135,7 +134,7 @@ class Vector(Coordinate):
         return self.distance
 
     def rotate(self,angle):
-        #fif you want to rotate something on a plane then use Plane's rotate method
+        #if you want to rotate something on a plane then use Plane's rotate method
         #this rotates the current vector around 0,0,0 (which I do not remember if that goes without saying)
         if not is_num.isNumber(angle):
             raise IncorrectInput("The first agrument must be a number")
@@ -294,6 +293,9 @@ class Plane:
         self.d = self.a * point.getX() + self.b * point.getY() + self.c * point.getZ()
         #self.a is from the formula while point.getX() is the value of the input coordinate
 
+    def left(self,point):
+        
+
     def on_plane(self,other):
         #this tells you if a coordinate or vector is on the plane
         #seems to work so far
@@ -329,3 +331,12 @@ class Plane:
         string += "\nD = " + str(self.d)
 
         return string
+
+    def determinant(self,a,b,c):
+        result = a.getX()*b.getY()*c.getZ()
+        result = result + b.getX()*c.getY()*a.getZ()
+        result = result + c.getX()*a.getY()*b.getZ()
+        result = result - c.getX()*b.getY()*a.getZ()
+        result = result - b.getX()*a.getY()*c.getZ()
+        result = result - a.getX()*c.getY()*b.getZ()
+        return result

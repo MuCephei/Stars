@@ -87,6 +87,30 @@ class Star(Sphere):
 		plt.axis('equal')
 		plt.show()
 
+	def intersection_star(self,observation_point,center,center_prime,radius_prime):
+		#this returns true if one star is obscuring the other star's path
+		#prime refers to the other star's center or radius
+		distance_one = observation_point.distance(center)
+		distance_two = observation_point.distance(center_prime)
+
+		vector_one = observation_point - center_prime
+		adjusted_vector = (distance_two/distance_one) * vector_one
+		adjusted_center = observation_point + adjusted_vector
+
+		adjusted_distance = adjusted_center.distance(center)
+		return (adjusted_distance - self.radius - (radius_prime * distance_two/distance_one)) < 0
+
+	def total_light_obstruction(self,observation_point,center,center_prime,radius_prime):
+		total_light = 0
+		for i in light_array:
+			#we need to know if we need to reject the point of light or not
+			#to do this we find the shortest distance between a line made of two points and a third point
+			a = (center_prime - observation_point) * (center_prime - center)
+			b = (center - observation_point)
+			distance = a.distance/b.distance
+			if distance > radius_prime:
+				total_light = total_light + i.intensity
+		return total_light * self.luminosity_coefficient
 
 	def radius_in_AU(self):
 		return self.radius/constants.AU
