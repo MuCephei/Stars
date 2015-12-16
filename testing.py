@@ -34,8 +34,6 @@ sphere_two = sphere.Star(0.865,0.907)
 
 orbit_one = orbit.Orbit(sphere_one,sphere_two,b,orthagonal(b,a),b-c,-3594,0.5179)
 
-# orbit_one.plot()
-
 orbit_one.plot_time()
 
 #I'm looking to get a semi-major axis of 35.6 AU

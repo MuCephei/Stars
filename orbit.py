@@ -135,7 +135,7 @@ class Orbit:
 		self.ellipse_two.plot_specific_angles(yz,"y","z","orange",angle,self.body_two.radius_in_AU())
 		self.ellipse_two.plot_specific_angles(xz,"x","z","orange",angle,self.body_two.radius_in_AU())
 
-		plt.show()
+		plt.draw(fig)
 
 	def eccentric_anomaly(self,ea,mean_anomaly):
 		return mean_anomaly + self.eccentricity*math.cos(ea)-ea
