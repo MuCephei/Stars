@@ -165,7 +165,7 @@ class Ellipse:
         elif not is_num.isNumber(size) or size <= 0:
             raise IncorrectInput("The fifth input must be a positive number")
 
-        coordinates = self.get_coordinates(theta_values)
+        coordinates = self.get_coordinates(theta_values,len(theta_values))
 
         one_values = []
         two_values = []
@@ -174,7 +174,7 @@ class Ellipse:
             one_values.append(a.getDirection(axis_one))
             two_values.append(a.getDirection(axis_two))
 
-        figure.scatter(one_values,two_values,s = size,color = colour)
+        figure.scatter(one_values,two_values,color = colour)
 
     def plot(self,figure,axis_one,axis_two,colour,size = None,points = None):
         #figure is the figure that the points are going to be plotteed on

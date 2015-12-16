@@ -117,29 +117,23 @@ class Orbit:
 
 	def plot_time(self):
 
-		time = np.linspace(0,self.period*2,10)
+		time = np.linspace(0,self.period,100)
 		angle = []
 		for t in time:
 			angle.append(self.find_angle(t))
 
-		fig = plt.figure()
+		fig = plt.figure(figsize = (7,13))
 		xy = fig.add_subplot(311,aspect = 'equal',title = "X-Y Plane")
 		yz = fig.add_subplot(312,aspect = 'equal',title = "Y-Z Plane")
 		xz = fig.add_subplot(313,aspect = 'equal',title = "X-Z Plane")
 
-		self.ellipse_one.plot_specific_angles(xy,"x","y","green",t,self.body_one.radius_in_AU())
-		self.ellipse_one.plot_specific_angles(yz,"y","z","green",t,self.body_one.radius_in_AU())
-		self.ellipse_one.plot_specific_angles(xz,"x","z","green",t,self.body_one.radius_in_AU())
-		self.ellipse_one.plotCardinal(xy,"x","y")
-		self.ellipse_one.plotCardinal(yz,"y","z")
-		self.ellipse_one.plotCardinal(xz,"x","z")
+		self.ellipse_one.plot_specific_angles(xy,"x","y","green",angle,self.body_one.radius_in_AU())
+		self.ellipse_one.plot_specific_angles(yz,"y","z","green",angle,self.body_one.radius_in_AU())
+		self.ellipse_one.plot_specific_angles(xz,"x","z","green",angle,self.body_one.radius_in_AU())
 
-		self.ellipse_two.plot_specific_angles(xy,"x","y","orange",t,self.body_two.radius_in_AU())
-		self.ellipse_two.plot_specific_angles(yz,"y","z","orange",t,self.body_two.radius_in_AU())
-		self.ellipse_two.plot_specific_angles(xz,"x","z","orange",t,self.body_two.radius_in_AU())
-		self.ellipse_two.plotCardinal(xy,"x","y")
-		self.ellipse_two.plotCardinal(yz,"y","z")
-		self.ellipse_two.plotCardinal(xz,"x","z")
+		self.ellipse_two.plot_specific_angles(xy,"x","y","orange",angle,self.body_two.radius_in_AU())
+		self.ellipse_two.plot_specific_angles(yz,"y","z","orange",angle,self.body_two.radius_in_AU())
+		self.ellipse_two.plot_specific_angles(xz,"x","z","orange",angle,self.body_two.radius_in_AU())
 
 		plt.show()
 
