@@ -39,13 +39,26 @@ class Coordinate:
     def getZ(self):
     	return self.z
 
+    def getDirection(self,letter):
+        #The name is a little unclear
+        #This is where you give a letter as an input, say i
+        #and it will give you the X value
+        if (letter == 'x' or letter == 'i' or letter == 'X' or letter == 'I'):
+            return self.x
+        elif (letter == 'y' or letter == 'j' or letter == 'Y' or letter == 'J'):
+            return self.y
+        elif (letter == 'z' or letter == 'k' or letter == 'Z' or letter == 'K'):
+            return self.z
+        else:
+            return None
+
     def __add__(self,other):
-        #This only accepts Coordinate + Vector = Vector in that particular order
+        #This only accepts Coordinate + Vector = Coordinate in that particular order
         if isinstance(other,Vector):
             x = self.x + other.getX()
             y = self.y + other.getY()
             z = self.z + other.getZ()
-            return Vector(x,y,z)
+            return Coordinate(x,y,z)
         else:
             raise IncorrectAddition("You must add a Vector to a Vector or Coordinate")
 
@@ -108,6 +121,9 @@ class Vector(Coordinate):
         flat = Coordinate(self.x,self.y)
         return flat.distance(Coordinate())
         # This is the distance to the origin
+
+    def coordinate(self):
+        return Coordinate(self.x,self.y,self.z)
 
     def get_angleXY(self):
         return self.angleXY
@@ -244,6 +260,15 @@ class Vector(Coordinate):
         else:
             raise IncorrectDivision("You must divide a Vector by a Constant")
 
+    def __eq__(self,other):
+        #The other point must be a Vector
+        if isinstance(other,Vector):
+            if self.x == other.getX():
+                if self.y == other.getY():
+                    if self.z == other.getZ():
+                        return False
+        return True
+
 #*******************************************************************************************************
 
 class Plane:
@@ -270,7 +295,7 @@ class Plane:
         #self.a is from the formula while point.getX() is the value of the input coordinate
 
     def on_plane(self,other):
-        #this tells you if a coordinate is on the plane
+        #this tells you if a coordinate or vector is on the plane
         #seems to work so far
         if isinstance(other,Coordinate) or isinstance(other,Vector):
             return self.d == self.a * other.getX() + self.b * other.getY() + self.c * other.getZ()

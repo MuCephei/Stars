@@ -1,6 +1,14 @@
 import math
 #all these units are in SI unless otherwise specified
 
+AU = 1.4960 * 10 **11
+
+solar_mass = 1.9891*10**30
+
+solar_luminosity = 3.839*10**26
+
+solar_radius = 6.95508*10**8
+
 G = 6.67428*10**-11
 #Gravitational Constant
 #N m**2 kg**-2

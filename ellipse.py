@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 class Ellipse:
 
-    def __init__(self,focal_one,focal_two,vector_normal,distance):
+    def __init__(self,focal_one,focal_two,vector_normal,distance,size = None):
 
         #first I need to sanitize the data
         
@@ -37,13 +37,18 @@ class Ellipse:
         self.plane = coordinate.Plane(self.vector_normal,self.focal_one)
         self.vector = self.focal_one - self.focal_two
         #this vector is from focal_one to focal_two
-        self.eccentricity = self.vector.distance/(self.semimajoraxis * 2)
+        self.eccentricity = self.vector.get_distance()/(self.semimajoraxis * 2)
         if self.eccentricity > 1:
             raise IncorrectInput("These inputs do not produce a valid Ellipse")
         self.semiminor_axis = math.sqrt(self.semimajoraxis**2 * (1-self.eccentricity**2))
         self.area = math.pi * self.semimajoraxis * self.semiminor_axis
 
-        #this vector is from focal_one to focal_two
+        if size is None:
+            self.size = 1
+        elif is_num.isNumber(size):
+            self.size = float(size)
+        else:
+            raise IncorrectInput("The six argument must be a number")
 
     def __str__(self):
 
@@ -83,7 +88,7 @@ class Ellipse:
             current_location = self.focal_two + current_location
         return current_location
 
-    def get_coordinates(self,points = None):
+    def get_coordinates(self,theta_values,points = None):
         #this returns the coordinates of the ellipse
         #this is with respect to angle, not time becuase an ellipse isn't an orbit
         #hopefully this helps me implement both displaying the ellipses and projecting them
@@ -101,65 +106,10 @@ class Ellipse:
 
         return coordinates
 
-    def plot3(self,points = None):
+    def get_cardinalPoints(self):
 
-        coordinates = self.get_coordinates(points)
-
-        x_values = []
-        y_values = []
-        z_values = []
         cardinalPoints = []
-        cardinal_x_values = []
-        cardinal_y_values = []
-        cardinal_z_values = []
 
-        max_x = None
-        max_y = None
-        max_z = None
-
-        min_x = None
-        min_y = None
-        min_z = None
-
-        for a in coordinates:
-            x_addition = a.getX()
-            y_addition = a.getY()
-            z_addition = a.getZ()
-
-            x_values.append(x_addition)
-            y_values.append(y_addition)
-            z_values.append(z_addition)
-
-            if(max_x is None or x_addition > max_x):
-                max_x = x_addition
-            if(min_x is None or x_addition < min_x):
-                min_x = x_addition
-            if(max_y is None or y_addition > max_y):
-                max_y = y_addition
-            if(min_y is None or y_addition < min_y):
-                min_y = y_addition
-            if(max_z is None or z_addition > max_z):
-                max_z = z_addition
-            if(min_z is None or z_addition < min_z):
-                min_z = z_addition
-
-        x_difference = max_x - min_x
-        y_difference = max_y - min_y
-        z_difference = max_z - min_z
-
-        increase = .1
-
-        max_x += 1 + x_difference * increase
-        min_x -= 1 + x_difference * increase
-
-        max_y += 1 + y_difference * increase
-        min_y -= 1 + y_difference * increase
-
-        max_z += 1 + z_difference * increase
-        min_z -= 1 + z_difference * increase
-
-        #we have our normal ellipse values plotted
-        #now to make sure that this works we will also plot the cardinal points of the ellipse
         #(The cardinal points are the two farest away points and the two closest points)
         #or the points at either end of the semi major/minor axises 
 
@@ -179,39 +129,89 @@ class Ellipse:
         #this is negative becuase perpendicular_vector is going in the opposite direction
         #these are the semiminor end points
 
+        return cardinalPoints
+
+    def plotCardinal(self,figure,axis_one,axis_two):
+
+        if not isinstance(figure,plt.Subplot):
+            raise IncorrectInput("The first input must be a figure")
+
+        if (self.focal_one.getDirection(axis_one) == None or self.focal_one.getDirection(axis_two) == None):
+            raise IncorrectInput("The second and third inputs must be vaild axis names")
+
+        cardinalPoints = self.get_cardinalPoints()
+
+        cardinal_one_values = []
+        cardinal_two_values = []
+
         for i in cardinalPoints:
-            cardinal_x_values.append(i.getX())
-            cardinal_y_values.append(i.getY())
-            cardinal_z_values.append(i.getZ())
+            cardinal_one_values.append(i.getDirection(axis_one))
+            cardinal_two_values.append(i.getDirection(axis_two))
 
-        #These cardinal points help me make sure that the correct ellipse is being plotted
+        figure.scatter([self.focal_one.getDirection(axis_one),self.focal_two.getDirection(axis_one)],
+            [self.focal_one.getDirection(axis_two),self.focal_two.getDirection(axis_two)],color = 'red')
+        figure.scatter(cardinal_one_values,cardinal_two_values,color = 'blue')
 
-        fig = plt.figure(figsize = (8,13))
-        #the above number are arbirary numbers, I just picked some I liked to be the size of the big image it makes
-        #I thought about making a function to do this, but it seemed unnessary
+    def plot_specific_angles(self,figure,axis_one,axis_two,colour,theta_values,size = None):
 
-        xy = fig.add_subplot(311,aspect = 'equal',title = "X-Y Plane")
-        xy.scatter(x_values,y_values,color = 'green')
-        xy.axis([min_x,max_x,min_y,max_y])
+        if not isinstance(figure,plt.Subplot):
+            raise IncorrectInput("The first input must be a figure")
+
+        if (self.focal_one.getDirection(axis_one) == None or self.focal_one.getDirection(axis_two) == None):
+            raise IncorrectInput("The second and third inputs must be vaild axis names")
+
+        if size is None:
+            size = 1
+        elif not is_num.isNumber(size) or size <= 0:
+            raise IncorrectInput("The fifth input must be a positive number")
+
+        coordinates = self.get_coordinates(theta_values)
+
+        one_values = []
+        two_values = []
+
+        for a in coordinates:
+            one_values.append(a.getDirection(axis_one))
+            two_values.append(a.getDirection(axis_two))
+
+        figure.scatter(one_values,two_values,s = size,color = colour)
+
+    def plot(self,figure,axis_one,axis_two,colour,size = None,points = None):
+        #figure is the figure that the points are going to be plotteed on
+        #I'm not sure how to gets
+
+        #sanitize data
+
+        if not isinstance(figure,plt.Subplot):
+            raise IncorrectInput("The first input must be a figure")
+
+        if (self.focal_one.getDirection(axis_one) == None or self.focal_one.getDirection(axis_two) == None):
+            raise IncorrectInput("The second and third inputs must be vaild axis names")
+
+        if points is None:
+            points = 1000 #default
+
+        if size is None:
+            size = 1
+        elif not is_num.isNumber(size) or size <= 0:
+            raise IncorrectInput("The fifth input must be a positive number")
+
+        #I'm not gona check that colour is valid
+
+        theta_values = numpy.linspace(0,math.pi*2,points)
+
+        coordinates = self.get_coordinates(theta_values)
+
+        one_values = []
+        two_values = []
+
+        for a in coordinates:
+            one_values.append(a.getDirection(axis_one))
+            two_values.append(a.getDirection(axis_two))
+
+
+        figure.scatter(one_values,two_values,s = size,color = colour)
         #Below is the central focal points and the cardinal points
-        xy.scatter([self.focal_one.getX(),self.focal_two.getX()],[self.focal_one.getY(),self.focal_two.getY()],color = 'red')
-        xy.scatter(cardinal_x_values,cardinal_y_values,color = 'blue')
-
-        zy = fig.add_subplot(312,aspect = 'equal',title = "Y-Z Plane")
-        zy.scatter(z_values,y_values,color = 'green')
-        zy.axis([min_z,max_z,min_y,max_y])
-        #Below is the central focal points and the cardinal points
-        zy.scatter([self.focal_one.getZ(),self.focal_two.getZ()],[self.focal_one.getY(),self.focal_two.getY()],color = 'red')
-        zy.scatter(cardinal_z_values,cardinal_y_values,color = 'blue')
-
-        xz = fig.add_subplot(313,aspect = 'equal',title = "X-Z Plane")
-        xz.scatter(x_values,z_values,color = 'green')
-        xz.axis([min_x,max_x,min_z,max_z])
-        #Below is the central focal points and the cardinal points
-        xz.scatter([self.focal_one.getX(),self.focal_two.getX()],[self.focal_one.getZ(),self.focal_two.getZ()],color = 'red')
-        xz.scatter(cardinal_x_values,cardinal_z_values,color = 'blue')
-
-        plt.show()
 
 class Circle(Ellipse):
 

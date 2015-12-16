@@ -1,42 +1,43 @@
 import ellipse
 import coordinate
 import math
+import sphere
+import matplotlib.pyplot as plt
+import random
+import orbit
+import constants
 
 #This prints a bunch of fun ellipses
 
-a = coordinate.Coordinate()
-b = coordinate.Coordinate(1,1)
-z = coordinate.Coordinate(1,1,2)
-c = coordinate.Coordinate(3,3)
-d = coordinate.Coordinate(5,1,15)
-e = coordinate.Coordinate(0,0,7)
-f = coordinate.Coordinate(3,5)
-g = coordinate.Coordinate(0,5,3)
-h = coordinate.Coordinate(0,5,0)
+origin = coordinate.Coordinate()
 
-ellipseZ = ellipse.Ellipse(a,e,a-c,10)
-ellipseZ.plot3()
+def orthagonal(point_one,point_two):
+	#takes two coordinates and returns a vector
+	vector_one = point_one - point_two
+	vector_two = point_one - origin
+	return vector_one * vector_two
 
-ellipseA = ellipse.Ellipse(b,z,a-d,5)
-ellipseA.plot3()
+range_max = 100
+range_min = -100
 
-ellipseB = ellipse.Ellipse(a,h,a-g,10)
-ellipseB.plot3()
+vectorZero = coordinate.Vector()
 
-ellipseB = ellipse.Ellipse(a,b,a-f,5)
-ellipseB.plot3()
+a = coordinate.Coordinate(3,4,5)
+b = coordinate.Coordinate(17,-4,9)
+c = coordinate.Coordinate(-1,-1,-1)
+d = coordinate.Coordinate(4,9,16)
 
-ellipseB = ellipse.Ellipse(d,h,a-z,25)
-ellipseB.plot3()
+#def __init__(self,body_one,body_two,barycenter,vector_normal,vector_inline,relative_speed,orbital_distance,eccentricity):
 
-ellipseC = ellipse.Ellipse(c,f,a-b,15)
-ellipseC.plot3()
+sphere_one = sphere.Star(1.227,1.1)
+sphere_two = sphere.Star(0.865,0.907)
 
-ellipseD = ellipse.Ellipse(c,g,a-b,5)
-ellipseD.plot3()
+orbit_one = orbit.Orbit(sphere_one,sphere_two,b,orthagonal(b,a),b-c,-3594,0.5179)
 
-ellipseE = ellipse.Ellipse(c,b,a-g,5)
-ellipseE.plot3()
+orbit_one.plot()
 
-ellipseE = ellipse.Ellipse(b,c,a-g,5)
-ellipseE.plot3()
+orbit_one.plot_time()
+
+#I'm looking to get a semi-major axis of 35.6 AU
+
+
