@@ -169,7 +169,7 @@ class Vector(Coordinate):
             #here we just return y
             result = Vector(0,1,0)
         else:
-            result = Vector(self.x,self.z * -1, self.y)
+            result = self*Vector(1,0,0)
         return result
 
     def __init__(self,x = None,y = None,z = None):
