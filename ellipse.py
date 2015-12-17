@@ -69,7 +69,6 @@ class Ellipse:
         #for example if theta is pi/2 then it will give the distance to the point directly above focal_one 
         # in the ellipse's own plane of reference
 
-        theta = is_num.angle(theta)
         result = theta
         #this makes the angle <= 2pi and > 0
         if theta is not None:
@@ -118,16 +117,26 @@ class Ellipse:
         perpendicular_vector = self.plane.rotate(unitVector,math.pi/2)
 
         cardinalPoints.append(self.focal_two + (unitVector * distance_along_semimajoraxis))
+        #purple
         cardinalPoints.append(self.focal_one - (unitVector * distance_along_semimajoraxis))
+        #yellow
         #this is negative becuase self.vector is going in the opposite direction
         #these are the semimajor end points
 
         cardinalPoints.append(middle + (perpendicular_vector * self.semiminor_axis))
+        #pink
         cardinalPoints.append(middle - (perpendicular_vector * self.semiminor_axis))
+        #blue
         #this is negative becuase perpendicular_vector is going in the opposite direction
         #these are the semiminor end points
 
         return cardinalPoints
+
+    def plot_bonus_point(self,figure,axis_one,axis_two,point):
+        value_one = [point.getDirection(axis_one)]
+        value_two = [point.getDirection(axis_two)]
+
+        figure.scatter(value_one,value_two,color = 'black')
 
     def plotCardinal(self,figure,axis_one,axis_two):
 
@@ -138,7 +147,8 @@ class Ellipse:
             raise IncorrectInput("The second and third inputs must be vaild axis names")
 
         cardinalPoints = self.get_cardinalPoints()
-        colours = ('purple','yellow','black','white')
+        colours = ('purple','yellow','pink','blue')
+        #these are so the cardinal points may be indetified individually on the plot
         cardinal_one_values = []
         cardinal_two_values = []
 

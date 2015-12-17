@@ -9,30 +9,41 @@ import constants
 
 #This prints a bunch of fun ellipses
 
-origin = coordinate.Coordinate()
+origin = coordinate.origin
 
-def orthagonal(point_one,point_two):
-	#takes two coordinates and returns a vector
-	vector_one = point_one - point_two
-	vector_two = point_one - origin
-	return vector_one * vector_two
-
-a = coordinate.Coordinate(3,4,5)
+a = coordinate.Coordinate(0,0,40000000000)
 b = coordinate.Coordinate(17,-4,9)
-c = coordinate.Coordinate(-1,-1,-1)
+c = coordinate.Coordinate(0,1000000000,10000000000)
 d = coordinate.Coordinate(4,9,16)
+e = coordinate.Coordinate(40000000000,0,0)
+f = coordinate.Coordinate(10000000000,100000000,0)
+g = coordinate.Coordinate(0,1100000000,10000000000)
+
+x = origin - coordinate.Coordinate(1,0,0)
+y = origin - coordinate.Coordinate(0,1,0) 
+z = origin - coordinate.Coordinate(0,0,1)
+other = origin - coordinate.Coordinate(1,1,1)
 
 #def __init__(self,body_one,body_two,barycenter,vector_normal,vector_inline,relative_speed,orbital_distance,eccentricity):
+sphere_one = sphere.Star(10,100)
+sphere_two = sphere.Star(1,1)
+sphere_three = sphere.Star(1,1)
+sphere_one.plot()
 
-sphere_one = sphere.Star(1.227,1.1)
-sphere_two = sphere.Star(0.865,0.907)
-# sphere_one.plot()
-# sphere_two.plot()
+sphere_one.plot_with_obstruction(origin,a,c,sphere_two)
+sphere_one.plot_with_obstruction(origin,a,g,sphere_two)
 
-orbit_one = orbit.Orbit(sphere_one,sphere_two,b,orthagonal(b,a),b-c,-3594,0.5179)
+sphere_one.create_light_array(x)
+sphere_two.create_light_array(x)
 
-orbit_one.plot_time(200)
+sphere_one.plot_with_obstruction(origin,e,f,sphere_two)
 
-#I'm looking to get a semi-major axis of 35.6 AU
+orbit_one = orbit.Orbit(sphere_two,sphere_three,b,(b-d).find_orthagonal(),b-d,-100000000000000,0.5179)
+
+orbit_one.plot_time(50)
+
+observation_point = ((b-d)*constants.AU * 100000000).coordinate()
+
+orbit_one.plot_raw_luminosity(observation_point)
 
 

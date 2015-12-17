@@ -20,6 +20,14 @@ class Coordinate:
     def __str__(self):
     	return "X:" + str(self.x) +" Y:" + str(self.y) + " Z:" + str(self.z)
 
+    def shortest_path(self,a,b):
+        #this finds the shorestest path from self to the line made by a and b
+        origin = Coordinate()
+        top = (self - a)*(self - b)
+        result =  top.distance
+        result = result /b.distance(a)
+        return result
+
     def distance(self,other):
         if isinstance(other,Coordinate):
             deltaX = self.x - other.getX()
@@ -139,7 +147,6 @@ class Vector(Coordinate):
         if not is_num.isNumber(angle):
             raise IncorrectInput("The first agrument must be a number")
 
-        angle = is_num.angle(angle)
         x = (self.x * math.cos(angle)) - (self.y * math.sin(angle))
         y = (self.x * math.sin(angle)) + (self.y * math.cos(angle))
 
@@ -154,6 +161,16 @@ class Vector(Coordinate):
             y = self.y/self.distance
             z = self.z/self.distance
             return Vector(x,y,z)
+
+    def find_orthagonal(self):
+        #this returns a vector orthagonal in the x axis 90 degrees
+        if(self.x != 0 and self.y == 0 and self.z == 0):
+            #this is when the vector is exactly x
+            #here we just return y
+            result = Vector(0,1,0)
+        else:
+            result = Vector(self.x,self.z * -1, self.y)
+        return result
 
     def __init__(self,x = None,y = None,z = None):
         Coordinate.__init__(self,x,y,z)
@@ -293,16 +310,24 @@ class Plane:
         self.d = self.a * point.getX() + self.b * point.getY() + self.c * point.getZ()
         #self.a is from the formula while point.getX() is the value of the input coordinate
 
-    def left(self,point):
-        
+    def left(self,other):
+        return self.a * other.getX() + self.b * other.getY() + self.c * other.getZ() - self.d
 
     def on_plane(self,other):
         #this tells you if a coordinate or vector is on the plane
         #seems to work so far
+        result = False
         if isinstance(other,Coordinate) or isinstance(other,Vector):
-            return self.d == self.a * other.getX() + self.b * other.getY() + self.c * other.getZ()
+            if self.d * 1.001 >= self.a * other.getX() + self.b * other.getY() + self.c * other.getZ():
+                if self.d * .999 <= self.a * other.getX() + self.b * other.getY() + self.c * other.getZ():
+                    result = True
+            if self.d * 1.001 <= self.a * other.getX() + self.b * other.getY() + self.c * other.getZ():
+                if self.d * .999 >= self.a * other.getX() + self.b * other.getY() + self.c * other.getZ():
+                    result = True
+            #this is designed to allow for a slight rounding error        
         else:
             raise IncorrectInput("The first input must be a coordinate")
+        return result
 
     def rotate(self,other,angle):
         #this rotates an vector around the vector normal to the plane
@@ -312,8 +337,6 @@ class Plane:
 
         if not is_num.isNumber(angle):
             raise IncorrectInput("The second agrument must be a number")
-
-        angle = is_num.angle(angle)
 
         cross = (other * self.vector_normal).unitVector()
         #this gives us a vector pointing in the right direction with a length of one
@@ -332,11 +355,4 @@ class Plane:
 
         return string
 
-    def determinant(self,a,b,c):
-        result = a.getX()*b.getY()*c.getZ()
-        result = result + b.getX()*c.getY()*a.getZ()
-        result = result + c.getX()*a.getY()*b.getZ()
-        result = result - c.getX()*b.getY()*a.getZ()
-        result = result - b.getX()*a.getY()*c.getZ()
-        result = result - a.getX()*c.getY()*b.getZ()
-        return result
+origin = Coordinate()
