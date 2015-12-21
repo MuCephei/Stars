@@ -1,7 +1,12 @@
+#This is the backbone of the whole operation
+#This module include coordinates,vectors and planes
+#more information will be included in each class
 import is_num
 import math
 
 class Coordinate:
+    #A coordinate has x,y,z values and can find the distance between itself and another point
+    #it can also find the shortest path between a path made by two other coordinates and it self
 
     def __init__(self,x = None,y = None,z = None):
         self.x = 0
@@ -22,13 +27,20 @@ class Coordinate:
 
     def shortest_path(self,a,b):
         #this finds the shorestest path from self to the line made by a and b
-        origin = Coordinate()
+        #this is motivated by the area between three points being a triangle
+        #the top portion is twice the area of said triangle (by making a rectangle)
         top = (self - a)*(self - b)
+        #note that self-a gives a vector from self to a
         result =  top.distance
+        #the cross product of the two vectors above has a distance equal to the area of the square
         result = result /b.distance(a)
+        #recall that a triangle is base*height/2
+        #so if the square is twice the area of the triangle (or base * height)
+        #then dividing by base gives height, and the diseired length
         return result
 
     def distance(self,other):
+        #gives distance from self to other
         if isinstance(other,Coordinate):
             deltaX = self.x - other.getX()
             deltaY = self.y - other.getY()
@@ -169,7 +181,7 @@ class Vector(Coordinate):
             #here we just return y
             result = Vector(0,1,0)
         else:
-            result = Vector(self.x,self.z * -1, self.y)
+            result = self*Vector(1,0,0)
         return result
 
     def __init__(self,x = None,y = None,z = None):
@@ -288,7 +300,6 @@ class Vector(Coordinate):
 #*******************************************************************************************************
 
 class Plane:
-    #this may need to be adjusted
 
     def __init__(self,vector_normal,point):
         #the equation fo a plane is 
@@ -331,7 +342,7 @@ class Plane:
 
     def rotate(self,other,angle):
         #this rotates an vector around the vector normal to the plane
-        #returns a other
+        #returns a vector
         if not isinstance(other,Vector):
             raise IncorrectInput("The first input must be a Vector")
 

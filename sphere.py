@@ -1,3 +1,6 @@
+#the limb darkening calculations are done here
+#the star has no concept of time of space other than what it is explictly told
+
 import is_num
 import math
 import constants
@@ -9,6 +12,8 @@ class Sphere:
 	#Celestial spheres are fun
 
 	#This is intended to be used to implement stars that shine as well as objects that don't
+	#I never got around to making default methods here and so both objects must shine
+	#if you want one that doens't shine you are unfortunatly out of luck
 	#This should be interpreted in the context of orbits but doens't need to be
 
 	def __init__(self,radius,mass):
@@ -27,6 +32,7 @@ class Sphere:
 		self.volume = 4/3 * math.pi * self.radius**3
 		self.area = 4 * math.pi * self.radius**2
 		self.averageDensity = self.volume/self.mass
+		#these never get used but are fun
 
 	def flux(self,distance):
 		return 0
@@ -38,13 +44,26 @@ class Star(Sphere):
 	#This is a sphere that we know one hell of a lot more about
 	#mostly from it's mass
 
-
 	def create_light_array(self,vector_prime):
+		#this is the part that deal with solar limb darkining and so I will examine in a bit more detail
 		vector_prime = vector_prime.unitVector()
+		#vector_prime is the vector in the direction of the half circle that is created by this 
 		vector_normal = vector_prime.find_orthagonal().unitVector()
+		#first we need a way of expressing direction that does not depend on what angle is chosen for the half sphere to be facing
+		#we do this with vector_normal and aux
+		#all three vector are orthagonal to each other and can be used as an impromtu coordinate system
+		#so to that end I have made them all unitvectors
 		vector_aux = (vector_prime*vector_normal).unitVector()
+
 		total_limb_luminosity = 0
 		self.light_array = []
+
+		#the idea behind all of this is that a uniform distribution over a disk is created and then expanded to be the size of the star
+		#at that point is in 2d, but is then formed to the surface of the star
+		#it is a series of Points which are a vector from the center of the star of length radius, and a luminosity value
+		#the luminosity value is a bit of a misnomer, it is attualy the eddigton luminosity coefficent which then get multiplied by the luminosity of the star whenever it is used
+		#while the points are being place on the surface of the star the angle they deviate from the vector_normal is caluclated and used to determine "luminosity"
+
 
 		for n in range(self.number_of_points):
 			distance = random.uniform(0,1)
@@ -53,6 +72,7 @@ class Star(Sphere):
 			b = math.sqrt(distance) * math.sin(theta)*self.radius
 			f = math.sqrt(a**2+b**2)
 			c = math.sqrt(self.radius**2-f**2)
+			#note that c is not the line from the center to the edge, it is mearly the vector normal component of that
 			vector_one = a * vector_normal
 			vector_two = b * vector_aux
 			vector_three = c * vector_prime
@@ -69,19 +89,23 @@ class Star(Sphere):
 		self.luminosity_coefficient = self.luminosity/total_limb_luminosity
 
 	def __init__(self,radius,mass):
+
 		self.luminosity = constants.solar_luminosity * (mass)**3.5
+		#the mass is as a ratio of solar mass anyway
 		Sphere.__init__(self,radius*constants.solar_radius,mass*constants.solar_mass)
+		#stars take input as a ratio of solar values
 		#I'm making a light array the consists of points, which each have a vector from the middle of the star
 		base_vector = coordinate.Vector(0,0,1)
-
-		total_limb_luminosity = 0
+		#the default diretion of the light array
 
 		self.number_of_points = 5000
 		#don't make this number much bigger than 30000
+		#this is where a huge slow down of the system can come from so be careful increasing the number
 
 		self.create_light_array(base_vector)
 
 	def plot(self):
+		#this plots the star with itself as the center
 
 		x_values = []
 		y_values = []
@@ -115,6 +139,7 @@ class Star(Sphere):
 		plt.show()
 
 	def plot_with_obstruction(self,observation_point,center,center_prime,body):
+		#this plots the star with itself as the farther body, possibly being blocked by the closer body
 		
 		x_values = []
 		y_values = []
@@ -182,6 +207,7 @@ class Star(Sphere):
 		return result < 0
 
 	def total_light_obstruction(self,observation_point,center,center_prime,radius_prime):
+		#this determines how much light gets though past an obstruction other star
 		total_light = 0
 		for i in self.light_array:
 			#we need to know if we need to reject the point of light or not
@@ -195,6 +221,7 @@ class Star(Sphere):
 		return self.radius/constants.AU
 
 	def flux(self,distance):
+		#never gets used
 		if is_num.isNumber(distance):
 			distance = float(distance)
 		else:
@@ -203,6 +230,7 @@ class Star(Sphere):
 		return self.luminosity/(4*math.pi*distance)
 
 class Point():
+	#just a simple data pairing
 
 	def __init__(self,vector,intensity):
 

@@ -1,3 +1,4 @@
+#this is an ellipse in a pure geometric sense
 import coordinate
 import is_num
 import numpy
@@ -87,13 +88,8 @@ class Ellipse:
             current_location = self.focal_two + current_location
         return current_location
 
-    def get_coordinates(self,theta_values,points = None):
-        #this returns the coordinates of the ellipse
-        #this is with respect to angle, not time becuase an ellipse isn't an orbit
-        #hopefully this helps me implement both displaying the ellipses and projecting them
-
-        if points is None:
-            points = 1000 #default
+    def get_coordinates(self,theta_values):
+        #this returns the coordinates of the ellipse for the angles specified by theta_values
 
         coordinates = []    
 
@@ -104,6 +100,11 @@ class Ellipse:
         return coordinates
 
     def get_cardinalPoints(self):
+        #this are important for testing if an ellipse is where it should be
+        #they are calculated differently than the other points and so if they line up with the other points
+        #it means that they were both calculated right
+        #not superuseful now that the ellipse functions correctly, but was important for testing
+        #I just leave them in now because it gives persepctive on how the ellipse is oreiented in space
 
         cardinalPoints = []
 
@@ -133,12 +134,16 @@ class Ellipse:
         return cardinalPoints
 
     def plot_bonus_point(self,figure,axis_one,axis_two,point):
+        #this is used if you want to put a point in a graph
+        #not terribly useful for non-testing purposes
         value_one = [point.getDirection(axis_one)]
         value_two = [point.getDirection(axis_two)]
 
         figure.scatter(value_one,value_two,color = 'black')
 
     def plotCardinal(self,figure,axis_one,axis_two):
+        #this gives the points different colours so they can be identified
+        #the various plot functions that take a figure as input as so you can overlay plots on top of each other
 
         if not isinstance(figure,plt.Subplot):
             raise IncorrectInput("The first input must be a figure")
@@ -147,7 +152,7 @@ class Ellipse:
             raise IncorrectInput("The second and third inputs must be vaild axis names")
 
         cardinalPoints = self.get_cardinalPoints()
-        colours = ('purple','yellow','pink','blue')
+        colours = ('purple','yellow','black','blue')
         #these are so the cardinal points may be indetified individually on the plot
         cardinal_one_values = []
         cardinal_two_values = []
@@ -161,6 +166,9 @@ class Ellipse:
         figure.scatter(cardinal_one_values,cardinal_two_values,color = colours)
 
     def plot_specific_angles(self,figure,axis_one,axis_two,colour,theta_values,size = None):
+        #this is another testing method that plots whatever theta values you want
+        #this is used by orbit when it plots the orbit with respect to time
+        #because ellipse itself has no concept of time built in
 
         if not isinstance(figure,plt.Subplot):
             raise IncorrectInput("The first input must be a figure")
@@ -173,7 +181,7 @@ class Ellipse:
         elif not is_num.isNumber(size) or size <= 0:
             raise IncorrectInput("The fifth input must be a positive number")
 
-        coordinates = self.get_coordinates(theta_values,len(theta_values))
+        coordinates = self.get_coordinates(theta_values)
 
         one_values = []
         two_values = []
@@ -185,8 +193,8 @@ class Ellipse:
         figure.scatter(one_values,two_values,color = colour)
 
     def plot(self,figure,axis_one,axis_two,colour,size = None,points = None):
-        #figure is the figure that the points are going to be plotteed on
-        #I'm not sure how to gets
+        #this plots the ellipse with a uniform distance of angle betwen points
+        #note that the angle is with respect to a focal_point and will not be uniform over the ellipse
 
         #sanitize data
 
@@ -222,6 +230,8 @@ class Ellipse:
 class Circle(Ellipse):
 
     #this is a specific case of an ellipse
+    #I wanted this because the main case of ellipse has problems with circles
+    #I don't think I 
 
     def __init__(self,focal,vector_normal,radius):
         #first I need to sanitize the data

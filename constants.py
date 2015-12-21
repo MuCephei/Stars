@@ -1,3 +1,4 @@
+#This should be fairly self explanitory
 import math
 #all these units are in SI unless otherwise specified
 
